@@ -33,6 +33,35 @@ func New(logger *log.Logger) (*Client, error) {
 	}, nil
 }
 
+func (c *Client) GetUser(userID string) (*User, error) {
+	reqPath := path.Join(c.URL.Path, "users", userID)
+	c.URL.Path = reqPath
+	c.Logger.Printf("send get request to %s\n", c.URL.String())
+	req, err := http.NewRequest("GET", c.URL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	c.Logger.Printf("got response from %s\n", c.URL.String())
+
+	user := User{}
+	if err := json.Unmarshal(body, &user); err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 func (c *Client) GetPost(postID string) (*Post, error) {
 	reqPath := path.Join(c.URL.Path, "items", postID)
 	c.URL.Path = reqPath

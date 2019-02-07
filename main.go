@@ -12,11 +12,10 @@ func main() {
 		panic(err)
 	}
 
-	post, err := qiita.GetPost("a0354d9ad70c1b8225b6")
+	user, err := qiita.GetUser("muiscript")
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("%+v\n", post.ID)
-	fmt.Printf("%+v\n", post.Title)
+	fmt.Printf("%+v\n", user)
 }
