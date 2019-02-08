@@ -33,6 +33,12 @@ func New(logger *log.Logger) (*Client, error) {
 	}, nil
 }
 
+func decodeBody(resp *http.Response, out interface{}) error {
+	defer resp.Body.Close()
+	decoder := json.NewDecoder(resp.Body)
+	return decoder.Decode(out)
+}
+
 func (c *Client) GetUser(userID string) (*User, error) {
 	reqPath := path.Join(c.URL.Path, "users", userID)
 	c.URL.Path = reqPath
@@ -46,16 +52,9 @@ func (c *Client) GetUser(userID string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	c.Logger.Printf("got response from %s\n", c.URL.String())
-
-	user := User{}
-	if err := json.Unmarshal(body, &user); err != nil {
+	var user User
+	if err := decodeBody(resp, &user); err != nil {
 		return nil, err
 	}
 
@@ -75,16 +74,9 @@ func (c *Client) GetPost(postID string) (*Post, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
-    body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	c.Logger.Printf("got response from %s\n", c.URL.String())
-
-    post := Post{}
-    if err := json.Unmarshal(body, &post); err != nil {
+    var post Post
+    if err := decodeBody(resp, &post); err != nil {
     	return nil, err
 	}
 
