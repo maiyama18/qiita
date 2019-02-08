@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -12,7 +13,8 @@ func main() {
 		panic(err)
 	}
 
-	user, err := qiita.GetUser("muiscript")
+	ctx := context.Background()
+	user, err := qiita.GetUser(ctx, "muiscript")
 	if err != nil {
 		panic(err)
 	}

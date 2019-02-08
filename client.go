@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"golang.org/x/net/context"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -33,20 +35,33 @@ func New(logger *log.Logger) (*Client, error) {
 	}, nil
 }
 
-func decodeBody(resp *http.Response, out interface{}) error {
+func (c *Client) decodeBody(resp *http.Response, out interface{}) error {
 	defer resp.Body.Close()
 	decoder := json.NewDecoder(resp.Body)
 	return decoder.Decode(out)
 }
 
-func (c *Client) GetUser(userID string) (*User, error) {
-	reqPath := path.Join(c.URL.Path, "users", userID)
-	c.URL.Path = reqPath
-	c.Logger.Printf("send get request to %s\n", c.URL.String())
-	req, err := http.NewRequest("GET", c.URL.String(), nil)
+func (c *Client) newRequest(ctx context.Context, method string, relativePath string, body io.Reader) (*http.Request, error) {
+	url := c.URL
+	url.Path = path.Join(url.Path, relativePath)
+
+	req, err := http.NewRequest(method, url.String(), body)
 	if err != nil {
 		return nil, err
 	}
+
+	req = req.WithContext(ctx)
+	req.Header.Set("User-Agent", "qiita go-client (muiscript/qiita)")
+
+	return req, nil
+}
+
+func (c *Client) GetUser(ctx context.Context, userID string) (*User, error) {
+	req, err := c.newRequest(ctx, "GET", path.Join("users", userID), nil)
+	if err != nil {
+		return nil, err
+	}
+	c.Logger.Printf("send get request to %s\n", c.URL.String())
 
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
@@ -54,21 +69,19 @@ func (c *Client) GetUser(userID string) (*User, error) {
 	}
 
 	var user User
-	if err := decodeBody(resp, &user); err != nil {
+	if err := c.decodeBody(resp, &user); err != nil {
 		return nil, err
 	}
 
 	return &user, nil
 }
 
-func (c *Client) GetPost(postID string) (*Post, error) {
-	reqPath := path.Join(c.URL.Path, "items", postID)
-	c.URL.Path = reqPath
-	c.Logger.Printf("send get request to %s\n", c.URL.String())
-	req, err := http.NewRequest("GET", c.URL.String(), nil)
+func (c *Client) GetPost(ctx context.Context, postID string) (*Post, error) {
+	req, err := c.newRequest(ctx, "GET", path.Join("items", postID), nil)
 	if err != nil {
 		return nil, err
 	}
+	c.Logger.Printf("send get request to %s\n", c.URL.String())
 
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
@@ -76,7 +89,7 @@ func (c *Client) GetPost(postID string) (*Post, error) {
 	}
 
     var post Post
-    if err := decodeBody(resp, &post); err != nil {
+    if err := c.decodeBody(resp, &post); err != nil {
     	return nil, err
 	}
 
