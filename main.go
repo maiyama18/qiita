@@ -23,7 +23,6 @@ func main() {
 	fmt.Printf("got user: %+v\n", user)
 	fmt.Println("")
 
-
 	followingMizchi, err := cli.IsFollowingUser(ctx, "mizchi")
 	if err != nil {
 		panic(err)

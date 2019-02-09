@@ -290,7 +290,7 @@ func TestClient_IsFollowingUser(t *testing.T) {
 			responseStatus: http.StatusUnauthorized,
 
 			expectedRequestPath: "/users/mizchi/following",
-			expectedErrString: "unauthorized",
+			expectedErrString:   "unauthorized",
 		},
 	}
 
