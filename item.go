@@ -18,4 +18,6 @@ type Item struct {
 	CommentsCount  int `json:"comments_count"`
 	LikesCount     int `json:"likes_count"`
 	ReactionsCount int `json:"reactions_count"`
+
+	User *User `json:"user"`
 }
