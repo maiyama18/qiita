@@ -12,6 +12,8 @@ import (
 	"path"
 )
 
+const BASE_URL = "https://qiita.com/api/v2"
+
 type Client struct {
 	URL        *url.URL
 	HTTPClient *http.Client
@@ -19,12 +21,12 @@ type Client struct {
 }
 
 func New(logger *log.Logger) (*Client, error) {
-	baseURL, err := url.Parse("https://qiita.com/api/v2")
+	baseURL, err := url.Parse(BASE_URL)
 	if err != nil {
 		return nil, err
 	}
 
-	discardLogger := log.New(ioutil.Discard, "", log.LstdFlags)
+	discardLogger := log.New(ioutil.Discard, "", 0)
 	if logger == nil {
 		logger = discardLogger
 	}
