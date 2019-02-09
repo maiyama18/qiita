@@ -22,13 +22,6 @@ item, err := qiita.GetItem(ctx, "b4ca1773580317e7112e")
 
 ## API list
 
-#### apis for authorization
-
-|  | Endpoint | Method Signature |
-| --- | --- | --- |
-|  | `POST` - `/api/v2/access_tokens` | |
-|  | `DELETE` - `/api/v2/access_tokens/:access_token` | |
-
 #### apis available for unauthorized/authorized users
 
 |  | Endpoint | Method Signature |
