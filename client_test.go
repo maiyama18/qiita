@@ -108,6 +108,8 @@ func TestClient_GetUser(t *testing.T) {
 }
 
 func TestClient_GetItem(t *testing.T) {
+	location, _ := time.LoadLocation("Asia/Tokyo")
+
 	tests := []struct {
 		desc           string
 		id             string
@@ -142,8 +144,8 @@ func TestClient_GetItem(t *testing.T) {
 			expectedBody:            "`React`でルーティングをするためのライブラリである`react-router`のv4の基本的な使い方を覚えるために、簡単なwebページを作ってみます。",
 			expectedRenderedBody:    "<p><code>React</code>でルーティングをするためのライブラリである<code>react-router</code>のv4の基本的な使い方を覚えるために、簡単なwebページを作ってみます。</p>",
 			expectedPrivate:         false,
-			expectedCreatedAt:       time.Date(2017, 06, 27, 15, 36, 55, 0, time.Local),
-			expectedUpdatedAt:       time.Date(2019, 1, 3, 14, 30, 25, 0, time.Local),
+			expectedCreatedAt:       time.Date(2017, 06, 27, 15, 36, 55, 0, location),
+			expectedUpdatedAt:       time.Date(2019, 1, 3, 14, 30, 25, 0, location),
 			expectedLikesCount:      309,
 			expectedUserID:          "muiscript",
 			expectedUserPermanentID: 159260,
@@ -186,8 +188,8 @@ func TestClient_GetItem(t *testing.T) {
 				assert.True(t, strings.Contains(item.Body, tt.expectedBody))
 				assert.True(t, strings.Contains(item.RenderedBody, tt.expectedRenderedBody))
 				assert.Equal(t, tt.expectedPrivate, item.Private)
-				assert.Equal(t, tt.expectedCreatedAt, item.CreatedAt)
-				assert.Equal(t, tt.expectedUpdatedAt, item.UpdatedAt)
+				assert.True(t, item.CreatedAt.Equal(tt.expectedCreatedAt))
+				assert.True(t, item.UpdatedAt.Equal(tt.expectedUpdatedAt))
 				assert.Equal(t, tt.expectedLikesCount, item.LikesCount)
 				assert.Equal(t, tt.expectedUserID, item.User.ID)
 				assert.Equal(t, tt.expectedUserPermanentID, item.User.PermanentID)
