@@ -15,12 +15,13 @@ import (
 const BASE_URL = "https://qiita.com/api/v2"
 
 type Client struct {
-	URL        *url.URL
-	HTTPClient *http.Client
-	Logger     *log.Logger
+	URL         *url.URL
+	HTTPClient  *http.Client
+	AccessToken string
+	Logger      *log.Logger
 }
 
-func New(logger *log.Logger) (*Client, error) {
+func New(accessToken string, logger *log.Logger) (*Client, error) {
 	baseURL, err := url.Parse(BASE_URL)
 	if err != nil {
 		return nil, err
@@ -32,9 +33,10 @@ func New(logger *log.Logger) (*Client, error) {
 	}
 
 	return &Client{
-		URL:        baseURL,
-		HTTPClient: http.DefaultClient,
-		Logger:     logger,
+		URL:         baseURL,
+		HTTPClient:  http.DefaultClient,
+		AccessToken: accessToken,
+		Logger:      logger,
 	}, nil
 }
 

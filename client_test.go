@@ -17,31 +17,42 @@ import (
 
 func TestNew(t *testing.T) {
 	tests := []struct {
-		desc   string
-		logger *log.Logger
+		desc        string
+		accessToken string
+		logger      *log.Logger
 
 		expectedURL    string
 		expectedLogger *log.Logger
 	}{
 		{
 			desc:   "success",
-			logger: log.New(ioutil.Discard, "", log.LstdFlags),
+			accessToken: "access_token",
+			logger: log.New(os.Stdout, "", log.LstdFlags),
 
 			expectedURL:    BASE_URL,
-			expectedLogger: log.New(ioutil.Discard, "", log.LstdFlags),
+			expectedLogger: log.New(os.Stdout, "", log.LstdFlags),
 		},
 		{
 			desc:   "success_with_no_logger",
+			accessToken: "access_token",
 			logger: nil,
 
 			expectedURL:    BASE_URL,
 			expectedLogger: log.New(ioutil.Discard, "", 0),
 		},
+		{
+			desc:   "success_with_no_access_token",
+			accessToken: "",
+			logger: log.New(os.Stdout, "", log.LstdFlags),
+
+			expectedURL:    BASE_URL,
+			expectedLogger: log.New(os.Stdout, "", log.LstdFlags),
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			cli, err := New(tt.logger)
+			cli, err := New(tt.accessToken, tt.logger)
 			if !assert.Nil(t, err) {
 				t.FailNow()
 			}
