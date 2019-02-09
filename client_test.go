@@ -1,56 +1,76 @@
 package main
 
 import (
+	"context"
+	"github.com/stretchr/testify/assert"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"os"
 	"testing"
 )
 
-// TODO: curl -i --raw で得たデータを使ってテストを追加する
-// 参考： http://hassansin.github.io/Unit-Testing-http-client-in-Go
-// type User struct {
-// 	ID           string `json:"id"`
-// 	PermanentID  int    `json:"permanent_id"`
-// 	ImageURL     string `json:"profile_image_url"`
-// 	Name         string `json:"name"`
-// 	Location     string `json:"location"`
-// 	Description  string `json:"description"`
-// 	WebsiteURL   string `json:"website_url"`
-// 	Organization string `json:"organization"`
-// 	TeamOnly     bool   `json:"team_only"`
-//
-// 	PostsCount     int `json:"items_count"`
-// 	FolloweesCount int `json:"followees_count"`
-// 	FollowersCount int `json:"followers_count"`
-//
-// 	GithubID   string `json:"github_login_name"`
-// 	LinkedinID string `json:"linkedin_id"`
-// 	twitterID  string `json: "twitter_screen_name"`
-// }
-
 func TestClient_GetUser(t *testing.T) {
 	tests := []struct {
-		responseFile        string
+		desc         string
+		id           string
+		responseFile string
 
-		expectedID          string
-		expectedPermanentID int
-		expectedGithubID    string
-		postsCount          int
-		FollowersCount      int
+		expectedRequestPath    string
+		expectedID             string
+		expectedPermanentID    int
+		expectedGithubID       string
+		expectedPostsCount     int
+		expectedFollowersCount int
 	}{
 		{
-			responseFile:        "user_response",
+			desc:         "success",
+			id:           "muiscript",
+			responseFile: "user_response",
 
-			expectedID:          "muiscript",
-			expectedPermanentID: 159260,
-			expectedGithubID:    "muiscript",
-			postsCount:          14,
-			FollowersCount:      11,
+			expectedRequestPath:    "/users/muiscript",
+			expectedID:             "muiscript",
+			expectedPermanentID:    159260,
+			expectedGithubID:       "muiscript",
+			expectedPostsCount:     14,
+			expectedFollowersCount: 11,
 		},
 	}
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-	}))
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+				assert.Equal(t, tt.expectedRequestPath, req.URL.Path)
 
-	c := New()
+				f, err := os.Open("./testdata/user_response")
+				assert.Nil(t, err)
+
+				b, err := ioutil.ReadAll(f)
+				assert.Nil(t, err)
+
+				w.Write(b)
+			}))
+			defer server.Close()
+
+			serverURL, err := url.Parse(server.URL)
+			assert.Nil(t, err)
+			cli := &Client{
+				URL:        serverURL,
+				HTTPClient: server.Client(),
+				Logger:     log.New(ioutil.Discard, "", 0),
+			}
+
+			user, err := cli.GetUser(context.Background(), tt.id)
+			assert.Nil(t, err, "err not nil")
+
+			assert.Equal(t, tt.expectedID, user.ID)
+			assert.Equal(t, tt.expectedPermanentID, user.PermanentID)
+			assert.Equal(t, tt.expectedGithubID, user.GithubID)
+			assert.Equal(t, tt.expectedGithubID, user.GithubID)
+			assert.Equal(t, tt.expectedPostsCount, user.PostsCount)
+			assert.Equal(t, tt.expectedFollowersCount, user.FollowersCount)
+		})
+	}
 }
