@@ -46,7 +46,7 @@ item, err := qiita.GetItem(ctx, "b4ca1773580317e7112e")
 
 |  | Endpoint | Method Signature |
 | --- | --- | --- |
-|  | `GET` - `/users/:user_id/following` | |
+| :heavy_check_mark: | `GET` - `/users/:user_id/following` | |
 |  | `DELETE` - `/users/:user_id/following` | |
 |  | `PUT` - `/users/:user_id/following` | |
 |  | `GET` - `/authenticated_user` | |
