@@ -1,9 +1,9 @@
-[![CircleCI](https://circleci.com/gh/muiscript/qiita/tree/master.svg?style=svg)](https://circleci.com/gh/muiscript/qiita/tree/master)
-[![codecov](https://codecov.io/gh/muiscript/qiita/branch/master/graph/badge.svg)](https://codecov.io/gh/muiscript/qiita)
-
 # qiita
 
 Go client library for [qiita API v2](https://qiita.com/api/v2/docs).
+
+[![CircleCI](https://circleci.com/gh/muiscript/qiita/tree/master.svg?style=svg)](https://circleci.com/gh/muiscript/qiita/tree/master)
+[![codecov](https://codecov.io/gh/muiscript/qiita/branch/master/graph/badge.svg)](https://codecov.io/gh/muiscript/qiita)
 
 ## usage
 
