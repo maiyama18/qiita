@@ -85,8 +85,8 @@ func (c *Client) GetUser(ctx context.Context, userID string) (*User, error) {
 	return &user, nil
 }
 
-func (c *Client) GetPost(ctx context.Context, postID string) (*Post, error) {
-	req, err := c.newRequest(ctx, "GET", path.Join("items", postID), nil)
+func (c *Client) GetItem(ctx context.Context, itemID string) (*Item, error) {
+	req, err := c.newRequest(ctx, "GET", path.Join("items", itemID), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -97,10 +97,10 @@ func (c *Client) GetPost(ctx context.Context, postID string) (*Post, error) {
 		return nil, err
 	}
 
-    var post Post
-    if err := c.decodeBody(resp, &post); err != nil {
+    var item Item
+    if err := c.decodeBody(resp, &item); err != nil {
     	return nil, err
 	}
 
-   	return &post, nil
+   	return &item, nil
 }
