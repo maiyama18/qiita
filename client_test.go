@@ -20,21 +20,21 @@ func TestNew(t *testing.T) {
 		desc   string
 		logger *log.Logger
 
-		expectedURL string
+		expectedURL    string
 		expectedLogger *log.Logger
 	}{
 		{
-			desc: "success",
+			desc:   "success",
 			logger: log.New(ioutil.Discard, "", log.LstdFlags),
 
-			expectedURL: BASE_URL,
+			expectedURL:    BASE_URL,
 			expectedLogger: log.New(ioutil.Discard, "", log.LstdFlags),
 		},
 		{
-			desc: "success_with_no_logger",
+			desc:   "success_with_no_logger",
 			logger: nil,
 
-			expectedURL: BASE_URL,
+			expectedURL:    BASE_URL,
 			expectedLogger: log.New(ioutil.Discard, "", 0),
 		},
 	}
