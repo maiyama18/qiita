@@ -15,12 +15,13 @@ import (
 const BASE_URL = "https://qiita.com/api/v2"
 
 type Client struct {
-	URL        *url.URL
-	HTTPClient *http.Client
-	Logger     *log.Logger
+	URL         *url.URL
+	HTTPClient  *http.Client
+	AccessToken string
+	Logger      *log.Logger
 }
 
-func New(logger *log.Logger) (*Client, error) {
+func New(accessToken string, logger *log.Logger) (*Client, error) {
 	baseURL, err := url.Parse(BASE_URL)
 	if err != nil {
 		return nil, err
@@ -32,9 +33,10 @@ func New(logger *log.Logger) (*Client, error) {
 	}
 
 	return &Client{
-		URL:        baseURL,
-		HTTPClient: http.DefaultClient,
-		Logger:     logger,
+		URL:         baseURL,
+		HTTPClient:  http.DefaultClient,
+		AccessToken: accessToken,
+		Logger:      logger,
 	}, nil
 }
 
@@ -45,7 +47,7 @@ func (c *Client) decodeBody(resp *http.Response, out interface{}) error {
 }
 
 func (c *Client) newRequest(ctx context.Context, method string, relativePath string, body io.Reader) (*http.Request, error) {
-	url := c.URL
+	url := *c.URL
 	url.Path = path.Join(url.Path, relativePath)
 
 	req, err := http.NewRequest(method, url.String(), body)
@@ -54,7 +56,10 @@ func (c *Client) newRequest(ctx context.Context, method string, relativePath str
 	}
 
 	req = req.WithContext(ctx)
-	req.Header.Set("User-Agent", "qiita go-client (muiscript/qiita)")
+	req.Header.Set("User-Agent", "qiita go-client (github.com/muiscript/qiita)")
+	if c.AccessToken != "" {
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+	}
 
 	return req, nil
 }
@@ -113,4 +118,27 @@ func (c *Client) GetItem(ctx context.Context, itemID string) (*Item, error) {
 	}
 
 	return &item, nil
+}
+
+func (c *Client) IsFollowingUser(ctx context.Context, userID string) (bool, error) {
+	req, err := c.newRequest(ctx, "GET", path.Join("users", userID, "following"), nil)
+	if err != nil {
+		return false, err
+	}
+	c.Logger.Printf("send get request to %s\n", c.URL.String())
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return false, err
+	}
+
+	if resp.StatusCode == http.StatusUnauthorized {
+		return false, fmt.Errorf("unauthorized. you may have provided no/invalid access token (status = %d)", resp.StatusCode)
+	}
+
+	if resp.StatusCode == http.StatusNoContent {
+		return true, nil
+	} else {
+		return false, nil
+	}
 }

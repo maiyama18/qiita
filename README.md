@@ -1,9 +1,9 @@
-[![CircleCI](https://circleci.com/gh/muiscript/qiita/tree/master.svg?style=svg)](https://circleci.com/gh/muiscript/qiita/tree/master)
-[![codecov](https://codecov.io/gh/muiscript/qiita/branch/master/graph/badge.svg)](https://codecov.io/gh/muiscript/qiita)
-
 # qiita
 
 Go client library for [qiita API v2](https://qiita.com/api/v2/docs).
+
+[![CircleCI](https://circleci.com/gh/muiscript/qiita/tree/master.svg?style=svg)](https://circleci.com/gh/muiscript/qiita/tree/master)
+[![codecov](https://codecov.io/gh/muiscript/qiita/branch/master/graph/badge.svg)](https://codecov.io/gh/muiscript/qiita)
 
 ## usage
 
@@ -21,13 +21,6 @@ item, err := qiita.GetItem(ctx, "b4ca1773580317e7112e")
 ```
 
 ## API list
-
-#### apis for authorization
-
-|  | Endpoint | Method Signature |
-| --- | --- | --- |
-|  | `POST` - `/api/v2/access_tokens` | |
-|  | `DELETE` - `/api/v2/access_tokens/:access_token` | |
 
 #### apis available for unauthorized/authorized users
 
@@ -53,7 +46,7 @@ item, err := qiita.GetItem(ctx, "b4ca1773580317e7112e")
 
 |  | Endpoint | Method Signature |
 | --- | --- | --- |
-|  | `GET` - `/users/:user_id/following` | |
+| :heavy_check_mark: | `GET` - `/users/:user_id/following` | |
 |  | `DELETE` - `/users/:user_id/following` | |
 |  | `PUT` - `/users/:user_id/following` | |
 |  | `GET` - `/authenticated_user` | |
