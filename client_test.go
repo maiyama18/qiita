@@ -15,6 +15,43 @@ import (
 	"time"
 )
 
+func TestNew(t *testing.T) {
+	tests := []struct {
+		desc   string
+		logger *log.Logger
+
+		expectedURL string
+		expectedLogger *log.Logger
+	}{
+		{
+			desc: "success",
+			logger: log.New(ioutil.Discard, "", log.LstdFlags),
+
+			expectedURL: BASE_URL,
+			expectedLogger: log.New(ioutil.Discard, "", log.LstdFlags),
+		},
+		{
+			desc: "success_with_no_logger",
+			logger: nil,
+
+			expectedURL: BASE_URL,
+			expectedLogger: log.New(ioutil.Discard, "", 0),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			cli, err := New(tt.logger)
+			if !assert.Nil(t, err) {
+				t.FailNow()
+			}
+
+			assert.Equal(t, cli.URL.String(), tt.expectedURL)
+			assert.Equal(t, cli.Logger, tt.expectedLogger)
+		})
+	}
+}
+
 func TestClient_GetUser(t *testing.T) {
 	tests := []struct {
 		desc           string
