@@ -31,7 +31,7 @@ item, err := qiita.GetItem(ctx, "b4ca1773580317e7112e")
 |  | Endpoint | Method Signature |
 | --- | --- | --- |
 | [ ] | `GET` - `/users` | |
-| [x] | `GET` - `/users/:user_id` | `GetUser(ctx context.Context, userID string) (*User, error)` |
+| <ul><li>[x]</li></ul> | `GET` - `/users/:user_id` | `GetUser(ctx context.Context, userID string) (*User, error)` |
 | [ ] | `GET` - `/users/:user_id/followees` | |
 | [ ] | `GET` - `/users/:user_id/followers` | |
 | [ ] | `GET` - `/users/:user_id/items` | |
