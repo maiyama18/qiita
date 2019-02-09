@@ -127,6 +127,7 @@ func TestClient_GetItem(t *testing.T) {
 		expectedLikesCount      int
 		expectedUserID          string
 		expectedUserPermanentID int
+		expectedTagNames        []string
 	}{
 		{
 			desc:           "success",
@@ -190,6 +191,7 @@ func TestClient_GetItem(t *testing.T) {
 				assert.Equal(t, tt.expectedLikesCount, item.LikesCount)
 				assert.Equal(t, tt.expectedUserID, item.User.ID)
 				assert.Equal(t, tt.expectedUserPermanentID, item.User.PermanentID)
+
 			} else {
 				if !assert.NotNil(t, err) {
 					t.FailNow()
