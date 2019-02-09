@@ -24,6 +24,31 @@ jobs:
           paths:
             - "/go/pkg/mod"
 
+  build:
+    docker:
+      - image: circleci/golang:1.11
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - go-mod-v1-{{ checksum "go.sum" }}
+
+      - run:
+          name: send test coverage
+          command: go test -coverprofile=coverage.txt && bash <(curl -s https://codecov.io/bash)
+
+      - run:
+          name: go build
+          command: go build .
+
+      - save_cache:
+          key: go-mod-v1-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
+
+
 workflows:
   version: 2
   ci:
@@ -32,3 +57,7 @@ workflows:
           filters:
             branches:
               ignore: master
+      - build:
+          filters:
+            branches:
+              only: master
