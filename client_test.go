@@ -25,25 +25,25 @@ func TestNew(t *testing.T) {
 		expectedLogger *log.Logger
 	}{
 		{
-			desc:   "success",
+			desc:        "success",
 			accessToken: "access_token",
-			logger: log.New(os.Stdout, "", log.LstdFlags),
+			logger:      log.New(os.Stdout, "", log.LstdFlags),
 
 			expectedURL:    BASE_URL,
 			expectedLogger: log.New(os.Stdout, "", log.LstdFlags),
 		},
 		{
-			desc:   "success_with_no_logger",
+			desc:        "success_with_no_logger",
 			accessToken: "access_token",
-			logger: nil,
+			logger:      nil,
 
 			expectedURL:    BASE_URL,
 			expectedLogger: log.New(ioutil.Discard, "", 0),
 		},
 		{
-			desc:   "success_with_no_access_token",
+			desc:        "success_with_no_access_token",
 			accessToken: "",
-			logger: log.New(os.Stdout, "", log.LstdFlags),
+			logger:      log.New(os.Stdout, "", log.LstdFlags),
 
 			expectedURL:    BASE_URL,
 			expectedLogger: log.New(os.Stdout, "", log.LstdFlags),
@@ -242,6 +242,80 @@ func TestClient_GetItem(t *testing.T) {
 				assert.Equal(t, tt.expectedUserID, item.User.ID)
 				assert.Equal(t, tt.expectedUserPermanentID, item.User.PermanentID)
 
+			} else {
+				if !assert.NotNil(t, err) {
+					t.FailNow()
+				}
+
+				assert.True(t, strings.Contains(err.Error(), tt.expectedErrString))
+			}
+
+		})
+	}
+}
+
+func TestClient_IsFollowingUser(t *testing.T) {
+	tests := []struct {
+		desc           string
+		targetUserID   string
+		responseFile   string
+		responseStatus int
+
+		expectedRequestPath string
+		expectedIsFollowing bool
+		expectedErrString   string
+	}{
+		{
+			desc:           "success_following",
+			targetUserID:   "mizchi",
+			responseFile:   "users_mizchi_following",
+			responseStatus: http.StatusNoContent,
+
+			expectedRequestPath: "/users/mizchi/following",
+			expectedIsFollowing: true,
+		},
+		{
+			desc:           "success_not_following",
+			targetUserID:   "yaotti",
+			responseFile:   "users_yaotti_following",
+			responseStatus: http.StatusNotFound,
+
+			expectedRequestPath: "/users/yaotti/following",
+			expectedIsFollowing: false,
+		},
+		{
+			desc:           "failure_no_token",
+			targetUserID:   "mizchi",
+			responseFile:   "users_mizchi_following-no_token",
+			responseStatus: http.StatusUnauthorized,
+
+			expectedRequestPath: "/users/mizchi/following",
+			expectedErrString: "unauthorized",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			server := newTestServer(t, tt.responseFile, tt.responseStatus, tt.expectedRequestPath)
+			defer server.Close()
+
+			serverURL, err := url.Parse(server.URL)
+			if !assert.Nil(t, err) {
+				t.FailNow()
+			}
+			cli := &Client{
+				URL:        serverURL,
+				HTTPClient: server.Client(),
+				Logger:     log.New(ioutil.Discard, "", 0),
+			}
+
+			isFollowing, err := cli.IsFollowingUser(context.Background(), tt.targetUserID)
+			if tt.responseStatus != http.StatusUnauthorized {
+				if !assert.Nil(t, err) {
+					t.FailNow()
+				}
+
+				assert.Equal(t, tt.expectedIsFollowing, isFollowing)
 			} else {
 				if !assert.NotNil(t, err) {
 					t.FailNow()

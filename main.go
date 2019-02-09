@@ -20,7 +20,21 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("")
 	fmt.Printf("got user: %+v\n", user)
+	fmt.Println("")
+
+
+	followingMizchi, err := cli.IsFollowingUser(ctx, "mizchi")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("following @mizchi: %+v\n", followingMizchi)
+	fmt.Println("")
+
+	followingYaotti, err := cli.IsFollowingUser(ctx, "yaotti")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("following @yaotti: %+v\n", followingYaotti)
 	fmt.Println("")
 }
