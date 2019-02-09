@@ -96,6 +96,14 @@ func (c *Client) GetItem(ctx context.Context, itemID string) (*Item, error) {
 	if err != nil {
 		return nil, err
 	}
+	if resp.StatusCode != http.StatusOK {
+		switch resp.StatusCode {
+		case http.StatusNotFound:
+			return nil, fmt.Errorf("item with id '%s' not found (status = %d)", itemID, resp.StatusCode)
+		default:
+			return nil, fmt.Errorf("unknown error (status = %d)", resp.StatusCode)
+		}
+	}
 
     var item Item
     if err := c.decodeBody(resp, &item); err != nil {

@@ -15,7 +15,6 @@ type Item struct {
 	CreatedAt time.Time `json:"created_at""`
 	UpdatedAt time.Time `json:"updated_at""`
 
-	PageViewsCount int `json:"page_views_count"`
 	CommentsCount  int `json:"comments_count"`
 	LikesCount     int `json:"likes_count"`
 	ReactionsCount int `json:"reactions_count"`
