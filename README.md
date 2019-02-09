@@ -31,14 +31,14 @@ item, err := qiita.GetItem(ctx, "b4ca1773580317e7112e")
 |  | Endpoint | Method Signature |
 | --- | --- | --- |
 | [ ] | `GET` - `/users` | |
-| <ul><li>[x]</li></ul> | `GET` - `/users/:user_id` | `GetUser(ctx context.Context, userID string) (*User, error)` |
+| :heavy_check_mark: | `GET` - `/users/:user_id` | `GetUser(ctx context.Context, userID string) (*User, error)` |
 | [ ] | `GET` - `/users/:user_id/followees` | |
 | [ ] | `GET` - `/users/:user_id/followers` | |
 | [ ] | `GET` - `/users/:user_id/items` | |
 | [ ] | `GET` - `/users/:user_id/stocks` | |
 | [ ] | `GET` - `/users/:user_id/following_tags` | |
 | [ ] | `GET` - `/items` | |
-| [x] | `GET` - `/items/:item_id` | `GetItem(ctx context.Context, itemID string) (*Post, error)` |
+| :heavy_check_mark: | `GET` - `/items/:item_id` | `GetItem(ctx context.Context, itemID string) (*Post, error)` |
 | [ ] | `GET` - `/items/:item_id/stockers` | |
 | [ ] | `GET` - `/items/:item_id/comments` | |
 | [ ] | `GET` - `/tags` | |
