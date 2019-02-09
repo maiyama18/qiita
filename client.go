@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"golang.org/x/net/context"
 	"io"
 	"io/ioutil"
@@ -66,6 +67,14 @@ func (c *Client) GetUser(ctx context.Context, userID string) (*User, error) {
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		switch resp.StatusCode {
+		case http.StatusNotFound:
+			return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, resp.StatusCode)
+		default:
+			return nil, fmt.Errorf("unknown error (status = %d)", resp.StatusCode)
+		}
 	}
 
 	var user User
