@@ -105,10 +105,10 @@ func (c *Client) GetItem(ctx context.Context, itemID string) (*Item, error) {
 		}
 	}
 
-    var item Item
-    if err := c.decodeBody(resp, &item); err != nil {
-    	return nil, err
+	var item Item
+	if err := c.decodeBody(resp, &item); err != nil {
+		return nil, err
 	}
 
-   	return &item, nil
+	return &item, nil
 }

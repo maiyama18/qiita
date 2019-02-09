@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/muiscript/qiita/tree/master.svg?style=svg)](https://circleci.com/gh/muiscript/qiita/tree/master)
+
 # qiita
 
 Go client library for [qiita API v2](https://qiita.com/api/v2/docs).
