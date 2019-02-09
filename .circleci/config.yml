@@ -39,10 +39,6 @@ jobs:
           name: send test coverage
           command: go test -coverprofile=coverage.txt && bash <(curl -s https://codecov.io/bash)
 
-      - run:
-          name: go build
-          command: go build .
-
       - save_cache:
           key: go-mod-v1-{{ checksum "go.sum" }}
           paths:
