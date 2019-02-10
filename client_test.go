@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"github.com/stretchr/testify/assert"
@@ -10,6 +11,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -68,7 +70,6 @@ func TestClient_GetUser(t *testing.T) {
 		desc           string
 		id             string
 		responseFile   string
-		responseStatus int
 
 		expectedRequestPath    string
 		expectedErrString      string
@@ -81,8 +82,7 @@ func TestClient_GetUser(t *testing.T) {
 		{
 			desc:           "success",
 			id:             "muiscript",
-			responseFile:   "users_muiscript-body",
-			responseStatus: http.StatusOK,
+			responseFile:   "users_muiscript",
 
 			expectedRequestPath:    "/users/muiscript",
 			expectedID:             "muiscript",
@@ -94,8 +94,7 @@ func TestClient_GetUser(t *testing.T) {
 		{
 			desc:           "failure_nonexistent_user",
 			id:             "nonexistent",
-			responseFile:   "users_nonexistent-body",
-			responseStatus: http.StatusNotFound,
+			responseFile:   "users_nonexistent",
 
 			expectedRequestPath: "/users/nonexistent",
 			expectedErrString:   "not found",
@@ -104,23 +103,7 @@ func TestClient_GetUser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-				assert.Equal(t, tt.expectedRequestPath, req.URL.Path)
-
-				dataPath := fmt.Sprintf("./testdata/responses/%s", tt.responseFile)
-				f, err := os.Open(dataPath)
-				if !assert.Nil(t, err) {
-					t.FailNow()
-				}
-
-				b, err := ioutil.ReadAll(f)
-				if !assert.Nil(t, err) {
-					t.FailNow()
-				}
-
-				w.WriteHeader(tt.responseStatus)
-				w.Write(b)
-			}))
+			server := newTestServer(t, tt.responseFile, tt.expectedRequestPath)
 			defer server.Close()
 
 			serverURL, err := url.Parse(server.URL)
@@ -132,7 +115,7 @@ func TestClient_GetUser(t *testing.T) {
 			}
 
 			user, err := cli.GetUser(context.Background(), tt.id)
-			if tt.responseStatus == http.StatusOK {
+			if tt.expectedErrString == "" {
 				if !assert.Nil(t, err) {
 					t.FailNow()
 				}
@@ -162,7 +145,6 @@ func TestClient_GetItem(t *testing.T) {
 		desc           string
 		id             string
 		responseFile   string
-		responseStatus int
 
 		expectedRequestPath     string
 		expectedErrString       string
@@ -182,8 +164,7 @@ func TestClient_GetItem(t *testing.T) {
 		{
 			desc:           "success",
 			id:             "b4ca1773580317e7112e",
-			responseFile:   "items_b4ca1773580317e7112e-body",
-			responseStatus: http.StatusOK,
+			responseFile:   "items_b4ca1773580317e7112e",
 
 			expectedRequestPath:     "/items/b4ca1773580317e7112e",
 			expectedID:              "b4ca1773580317e7112e",
@@ -201,8 +182,7 @@ func TestClient_GetItem(t *testing.T) {
 		{
 			desc:           "failure_nonexistent_item",
 			id:             "nonexistent",
-			responseFile:   "items_nonexistent-body",
-			responseStatus: http.StatusNotFound,
+			responseFile:   "items_nonexistent",
 
 			expectedRequestPath: "/items/nonexistent",
 			expectedErrString:   "not found",
@@ -211,7 +191,7 @@ func TestClient_GetItem(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			server := newTestServer(t, tt.responseFile, tt.responseStatus, tt.expectedRequestPath)
+			server := newTestServer(t, tt.responseFile, tt.expectedRequestPath)
 			defer server.Close()
 
 			serverURL, err := url.Parse(server.URL)
@@ -225,7 +205,7 @@ func TestClient_GetItem(t *testing.T) {
 			}
 
 			item, err := cli.GetItem(context.Background(), tt.id)
-			if tt.responseStatus == http.StatusOK {
+			if tt.expectedErrString == "" {
 				if !assert.Nil(t, err) {
 					t.FailNow()
 				}
@@ -259,7 +239,6 @@ func TestClient_IsFollowingUser(t *testing.T) {
 		desc           string
 		targetUserID   string
 		responseFile   string
-		responseStatus int
 
 		expectedRequestPath string
 		expectedIsFollowing bool
@@ -268,8 +247,7 @@ func TestClient_IsFollowingUser(t *testing.T) {
 		{
 			desc:           "success_following",
 			targetUserID:   "mizchi",
-			responseFile:   "users_mizchi_following-body",
-			responseStatus: http.StatusNoContent,
+			responseFile:   "users_mizchi_following",
 
 			expectedRequestPath: "/users/mizchi/following",
 			expectedIsFollowing: true,
@@ -277,8 +255,7 @@ func TestClient_IsFollowingUser(t *testing.T) {
 		{
 			desc:           "success_not_following",
 			targetUserID:   "yaotti",
-			responseFile:   "users_yaotti_following-body",
-			responseStatus: http.StatusNotFound,
+			responseFile:   "users_yaotti_following",
 
 			expectedRequestPath: "/users/yaotti/following",
 			expectedIsFollowing: false,
@@ -286,8 +263,7 @@ func TestClient_IsFollowingUser(t *testing.T) {
 		{
 			desc:           "failure_no_token",
 			targetUserID:   "mizchi",
-			responseFile:   "users_mizchi_following-no_token-body",
-			responseStatus: http.StatusUnauthorized,
+			responseFile:   "users_mizchi_following-no_token",
 
 			expectedRequestPath: "/users/mizchi/following",
 			expectedErrString:   "unauthorized",
@@ -296,7 +272,7 @@ func TestClient_IsFollowingUser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			server := newTestServer(t, tt.responseFile, tt.responseStatus, tt.expectedRequestPath)
+			server := newTestServer(t, tt.responseFile, tt.expectedRequestPath)
 			defer server.Close()
 
 			serverURL, err := url.Parse(server.URL)
@@ -310,7 +286,7 @@ func TestClient_IsFollowingUser(t *testing.T) {
 			}
 
 			isFollowing, err := cli.IsFollowingUser(context.Background(), tt.targetUserID)
-			if tt.responseStatus != http.StatusUnauthorized {
+			if tt.expectedErrString == "" {
 				if !assert.Nil(t, err) {
 					t.FailNow()
 				}
@@ -328,22 +304,49 @@ func TestClient_IsFollowingUser(t *testing.T) {
 	}
 }
 
-func newTestServer(t *testing.T, responseFile string, responseStatus int, expectedRequestPath string) *httptest.Server {
+func newTestServer(t *testing.T, responseFile string, expectedRequestPath string) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		assert.Equal(t, expectedRequestPath, req.URL.Path)
 
-		dataPath := fmt.Sprintf("./testdata/responses/%s", responseFile)
-		f, err := os.Open(dataPath)
+		headerPath := fmt.Sprintf("./testdata/responses/%s-header", responseFile)
+		h, err := os.Open(headerPath)
 		if !assert.Nil(t, err) {
 			t.FailNow()
 		}
+		sc := bufio.NewScanner(h)
+		for sc.Scan() {
+			line := sc.Text()
+			if len(line) == 0 {
+				continue
+			}
 
+			if strings.HasPrefix(line, "HTTP/2") {
+				codeStr := strings.Split(line, " ")[1]
+				code, err := strconv.Atoi(codeStr)
+				if err != nil {
+					continue
+				}
+				w.WriteHeader(code)
+			} else {
+				key := strings.Split(line, ": ")[0]
+				value := strings.Split(line, ": ")[1]
+				w.Header().Set(key, value)
+			}
+		}
+
+
+		bodyPath := fmt.Sprintf("./testdata/responses/%s-body", responseFile)
+		f, err := os.Open(bodyPath)
+		if !assert.Nil(t, err) {
+			t.FailNow()
+		}
 		b, err := ioutil.ReadAll(f)
 		if !assert.Nil(t, err) {
 			t.FailNow()
 		}
-
-		w.WriteHeader(responseStatus)
-		w.Write(b)
+		_, err = w.Write(b)
+		if !assert.Nil(t, err) {
+			t.FailNow()
+		}
 	}))
 }
