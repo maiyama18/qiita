@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"golang.org/x/net/context"
 	"io"
 	"io/ioutil"
 	"log"
@@ -13,6 +12,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"golang.org/x/net/context"
 )
 
 const BASE_URL = "https://qiita.com/api/v2"
@@ -105,7 +106,7 @@ func (c *Client) GetUsers(ctx context.Context, page int, perPage int) (*UsersRes
 	}
 
 	query := map[string]string{
-		"page": strconv.Itoa(page),
+		"page":     strconv.Itoa(page),
 		"per_page": strconv.Itoa(perPage),
 	}
 	req, err := c.newRequest(ctx, "GET", "users", query, nil)
@@ -143,12 +144,12 @@ func (c *Client) GetUsers(ctx context.Context, page int, perPage int) (*UsersRes
 	}
 
 	usersResp := &UsersResponse{
-		Page: page,
-		PerPage: perPage,
-		FirstPage: 1,
-		LastPage: lastPage,
+		Page:       page,
+		PerPage:    perPage,
+		FirstPage:  1,
+		LastPage:   lastPage,
 		TotalCount: totalCount,
-		Users: users,
+		Users:      users,
 	}
 
 	return usersResp, nil
