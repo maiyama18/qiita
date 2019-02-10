@@ -71,6 +71,43 @@ func (c *Client) parseHeaderLink(resp *http.Response) (map[string]*url.URL, erro
 	return links, nil
 }
 
+func (c *Client) extractUsersResponse(resp *http.Response, page int, perPage int) (*UsersResponse, error) {
+	var users []*User
+	if err := c.decodeBody(resp, &users); err != nil {
+		return nil, err
+	}
+
+	links, err := c.parseHeaderLink(resp)
+	if err != nil {
+		return nil, err
+	}
+	lastURL := links["last"]
+	lastPage, err := strconv.Atoi(lastURL.Query().Get("page"))
+	if err != nil {
+		return nil, err
+	}
+	if lastPage > 100 {
+		lastPage = 100
+	}
+
+	totalCount, err := strconv.Atoi(resp.Header.Get("total-count"))
+	if err != nil {
+		return nil, err
+	}
+
+	usersResp := &UsersResponse{
+		Page:       page,
+		PerPage:    perPage,
+		FirstPage:  1,
+		LastPage:   lastPage,
+		TotalCount: totalCount,
+		Users:      users,
+	}
+
+	return usersResp, nil
+}
+
+
 func (c *Client) newRequest(ctx context.Context, method string, relativePath string, query map[string]string, body io.Reader) (*http.Request, error) {
 	url := *c.URL
 	url.Path = path.Join(url.Path, relativePath)
@@ -120,39 +157,7 @@ func (c *Client) GetUsers(ctx context.Context, page int, perPage int) (*UsersRes
 		return nil, err
 	}
 
-	var users []*User
-	if err := c.decodeBody(resp, &users); err != nil {
-		return nil, err
-	}
-
-	links, err := c.parseHeaderLink(resp)
-	if err != nil {
-		return nil, err
-	}
-	lastURL := links["last"]
-	lastPage, err := strconv.Atoi(lastURL.Query().Get("page"))
-	if err != nil {
-		return nil, err
-	}
-	if lastPage > 100 {
-		lastPage = 100
-	}
-
-	totalCount, err := strconv.Atoi(resp.Header.Get("total-count"))
-	if err != nil {
-		return nil, err
-	}
-
-	usersResp := &UsersResponse{
-		Page:       page,
-		PerPage:    perPage,
-		FirstPage:  1,
-		LastPage:   lastPage,
-		TotalCount: totalCount,
-		Users:      users,
-	}
-
-	return usersResp, nil
+	return c.extractUsersResponse(resp, page, perPage)
 }
 
 func (c *Client) GetUser(ctx context.Context, userID string) (*User, error) {
@@ -206,39 +211,7 @@ func (c *Client) GetFollowees(ctx context.Context, userID string, page int, perP
 		return nil, err
 	}
 
-	var users []*User
-	if err := c.decodeBody(resp, &users); err != nil {
-		return nil, err
-	}
-
-	links, err := c.parseHeaderLink(resp)
-	if err != nil {
-		return nil, err
-	}
-	lastURL := links["last"]
-	lastPage, err := strconv.Atoi(lastURL.Query().Get("page"))
-	if err != nil {
-		return nil, err
-	}
-	if lastPage > 100 {
-		lastPage = 100
-	}
-
-	totalCount, err := strconv.Atoi(resp.Header.Get("total-count"))
-	if err != nil {
-		return nil, err
-	}
-
-	usersResp := &UsersResponse{
-		Page:       page,
-		PerPage:    perPage,
-		FirstPage:  1,
-		LastPage:   lastPage,
-		TotalCount: totalCount,
-		Users:      users,
-	}
-
-	return usersResp, nil
+	return c.extractUsersResponse(resp, page, perPage)
 }
 
 func (c *Client) GetItem(ctx context.Context, itemID string) (*Item, error) {
