@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -15,6 +14,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNew(t *testing.T) {
@@ -105,7 +106,7 @@ func TestClient_GetUsers(t *testing.T) {
 
 			expectedRequestPath: "/users",
 			expectedRawQuery:    "page=0&per_page=10",
-			expectedErrString: "page parameter should be",
+			expectedErrString:   "page parameter should be",
 		},
 		{
 			desc:         "failure_page_larger_than_100",
@@ -115,7 +116,7 @@ func TestClient_GetUsers(t *testing.T) {
 
 			expectedRequestPath: "/users",
 			expectedRawQuery:    "page=101&per_page=10",
-			expectedErrString: "page parameter should be",
+			expectedErrString:   "page parameter should be",
 		},
 		{
 			desc:         "failure_per_page_less_than_1",
@@ -125,7 +126,7 @@ func TestClient_GetUsers(t *testing.T) {
 
 			expectedRequestPath: "/users",
 			expectedRawQuery:    "page=3&per_page=0",
-			expectedErrString: "perPage parameter should be",
+			expectedErrString:   "perPage parameter should be",
 		},
 		{
 			desc:         "failure_per_page_larger_than_100",
@@ -135,7 +136,7 @@ func TestClient_GetUsers(t *testing.T) {
 
 			expectedRequestPath: "/users",
 			expectedRawQuery:    "page=3&per_page=101",
-			expectedErrString: "perPage parameter should be",
+			expectedErrString:   "perPage parameter should be",
 		},
 	}
 
@@ -177,9 +178,9 @@ func TestClient_GetUsers(t *testing.T) {
 
 func TestClient_GetUser(t *testing.T) {
 	tests := []struct {
-		desc           string
-		id             string
-		responseFile   string
+		desc         string
+		id           string
+		responseFile string
 
 		expectedRequestPath    string
 		expectedErrString      string
@@ -190,9 +191,9 @@ func TestClient_GetUser(t *testing.T) {
 		expectedFollowersCount int
 	}{
 		{
-			desc:           "success",
-			id:             "muiscript",
-			responseFile:   "users_muiscript",
+			desc:         "success",
+			id:           "muiscript",
+			responseFile: "users_muiscript",
 
 			expectedRequestPath:    "/users/muiscript",
 			expectedID:             "muiscript",
