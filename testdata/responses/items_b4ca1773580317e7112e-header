@@ -1,0 +1,20 @@
+HTTP/2 200 
+date: Sun, 10 Feb 2019 06:45:14 GMT
+content-type: application/json; charset=utf-8
+server: nginx
+x-frame-options: SAMEORIGIN
+x-xss-protection: 1; mode=block
+x-content-type-options: nosniff
+x-download-options: noopen
+x-permitted-cross-domain-policies: none
+referrer-policy: strict-origin-when-cross-origin
+etag: W/"d3385656a2bcf1a8b99688cc8be3c650"
+cache-control: max-age=0, private, must-revalidate
+rate-limit: 60
+rate-remaining: 56
+rate-reset: 1549784675
+vary: Origin
+x-runtime: 0.268359
+strict-transport-security: max-age=2592000
+x-request-id: 5c1c8577-0d67-498a-b8cd-24ff7eb06d42
+

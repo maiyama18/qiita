@@ -9,7 +9,7 @@ Go client library for [qiita API v2](https://qiita.com/api/v2/docs).
 
 ```go
 logger := log.New(os.Stdout, "[LOG]", log.LstdFlags)
-qiita := qiita.New(logger)
+qiita := qiita.New("<YOUR_ACCESS_TOKEN>", logger)
 
 ctx := context.Background()
 
@@ -26,7 +26,7 @@ item, err := qiita.GetItem(ctx, "b4ca1773580317e7112e")
 
 |  | Endpoint | Method Signature |
 | --- | --- | --- |
-|  | `GET` - `/users` | |
+| :heavy_check_mark: | `GET` - `/users` | `GetUsers(ctx context.Context, page int, perPage int)` |
 | :heavy_check_mark: | `GET` - `/users/:user_id` | `GetUser(ctx context.Context, userID string)` |
 |  | `GET` - `/users/:user_id/followees` | |
 |  | `GET` - `/users/:user_id/followers` | |
@@ -46,7 +46,7 @@ item, err := qiita.GetItem(ctx, "b4ca1773580317e7112e")
 
 |  | Endpoint | Method Signature |
 | --- | --- | --- |
-| :heavy_check_mark: | `GET` - `/users/:user_id/following` | |
+| :heavy_check_mark: | `GET` - `/users/:user_id/following` | `IsFollowingUser(ctx context.Context, userID string)` |
 |  | `DELETE` - `/users/:user_id/following` | |
 |  | `PUT` - `/users/:user_id/following` | |
 |  | `GET` - `/authenticated_user` | |
