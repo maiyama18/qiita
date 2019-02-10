@@ -119,7 +119,7 @@ func (c *Client) GetUsers(ctx context.Context, page int, perPage int) (*UsersRes
 		return nil, err
 	}
 
-	var users []User
+	var users []*User
 	if err := c.decodeBody(resp, &users); err != nil {
 		return nil, err
 	}
@@ -148,6 +148,7 @@ func (c *Client) GetUsers(ctx context.Context, page int, perPage int) (*UsersRes
 		FirstPage: 1,
 		LastPage: lastPage,
 		TotalCount: totalCount,
+		Users: users,
 	}
 
 	return usersResp, nil

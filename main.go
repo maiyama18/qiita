@@ -43,4 +43,7 @@ func main() {
 	}
 	fmt.Printf("usersResp: %+v\n", usersResp)
 	fmt.Println("")
+	for _, u := range usersResp.Users {
+		fmt.Printf("%+v\n", u)
+	}
 }

@@ -81,7 +81,7 @@ func TestClient_GetUser(t *testing.T) {
 		{
 			desc:           "success",
 			id:             "muiscript",
-			responseFile:   "users_muiscript",
+			responseFile:   "users_muiscript-body",
 			responseStatus: http.StatusOK,
 
 			expectedRequestPath:    "/users/muiscript",
@@ -94,7 +94,7 @@ func TestClient_GetUser(t *testing.T) {
 		{
 			desc:           "failure_nonexistent_user",
 			id:             "nonexistent",
-			responseFile:   "users_nonexistent",
+			responseFile:   "users_nonexistent-body",
 			responseStatus: http.StatusNotFound,
 
 			expectedRequestPath: "/users/nonexistent",
@@ -182,7 +182,7 @@ func TestClient_GetItem(t *testing.T) {
 		{
 			desc:           "success",
 			id:             "b4ca1773580317e7112e",
-			responseFile:   "items_b4ca1773580317e7112e",
+			responseFile:   "items_b4ca1773580317e7112e-body",
 			responseStatus: http.StatusOK,
 
 			expectedRequestPath:     "/items/b4ca1773580317e7112e",
@@ -201,7 +201,7 @@ func TestClient_GetItem(t *testing.T) {
 		{
 			desc:           "failure_nonexistent_item",
 			id:             "nonexistent",
-			responseFile:   "items_nonexistent",
+			responseFile:   "items_nonexistent-body",
 			responseStatus: http.StatusNotFound,
 
 			expectedRequestPath: "/items/nonexistent",
@@ -268,7 +268,7 @@ func TestClient_IsFollowingUser(t *testing.T) {
 		{
 			desc:           "success_following",
 			targetUserID:   "mizchi",
-			responseFile:   "users_mizchi_following",
+			responseFile:   "users_mizchi_following-body",
 			responseStatus: http.StatusNoContent,
 
 			expectedRequestPath: "/users/mizchi/following",
@@ -277,7 +277,7 @@ func TestClient_IsFollowingUser(t *testing.T) {
 		{
 			desc:           "success_not_following",
 			targetUserID:   "yaotti",
-			responseFile:   "users_yaotti_following",
+			responseFile:   "users_yaotti_following-body",
 			responseStatus: http.StatusNotFound,
 
 			expectedRequestPath: "/users/yaotti/following",
@@ -286,7 +286,7 @@ func TestClient_IsFollowingUser(t *testing.T) {
 		{
 			desc:           "failure_no_token",
 			targetUserID:   "mizchi",
-			responseFile:   "users_mizchi_following-no_token",
+			responseFile:   "users_mizchi_following-no_token-body",
 			responseStatus: http.StatusUnauthorized,
 
 			expectedRequestPath: "/users/mizchi/following",
