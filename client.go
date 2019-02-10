@@ -40,11 +40,8 @@ func New(accessToken string, logger *log.Logger) (*Client, error) {
 }
 
 func (c *Client) GetUsers(ctx context.Context, page int, perPage int) (*UsersResponse, error) {
-	if page < 1 || 100 < page {
-		return nil, fmt.Errorf("page parameter should be between 1 and 100. got %d", page)
-	}
-	if perPage < 1 || 100 < perPage {
-		return nil, fmt.Errorf("perPage parameter should be between 1 and 100. got %d", perPage)
+	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
+		return nil, err
 	}
 
 	query := map[string]string{
@@ -94,11 +91,8 @@ func (c *Client) GetUser(ctx context.Context, userID string) (*User, error) {
 }
 
 func (c *Client) GetFollowees(ctx context.Context, userID string, page int, perPage int) (*UsersResponse, error) {
-	if page < 1 || 100 < page {
-		return nil, fmt.Errorf("page parameter should be between 1 and 100. got %d", page)
-	}
-	if perPage < 1 || 100 < perPage {
-		return nil, fmt.Errorf("perPage parameter should be between 1 and 100. got %d", perPage)
+	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
+		return nil, err
 	}
 
 	query := map[string]string{

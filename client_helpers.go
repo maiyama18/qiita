@@ -40,6 +40,16 @@ func (c *Client) parseHeaderLink(resp *http.Response) (map[string]*url.URL, erro
 	return links, nil
 }
 
+func (c *Client) validatePaginationLimit(page, pageMin, pageMax, perPage, perPageMin, perPageMax int) error {
+	if page < pageMin || pageMax < page {
+		return fmt.Errorf("page parameter should be between 1 and 100. got %d", page)
+	}
+	if perPage < perPageMin || perPageMax < perPage {
+		return fmt.Errorf("perPage parameter should be between 1 and 100. got %d", perPage)
+	}
+	return nil
+}
+
 func (c *Client) extractUsersResponse(resp *http.Response, page int, perPage int) (*UsersResponse, error) {
 	var users []*User
 	if err := c.decodeBody(resp, &users); err != nil {
