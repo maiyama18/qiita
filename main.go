@@ -36,4 +36,11 @@ func main() {
 	}
 	fmt.Printf("following @yaotti: %+v\n", followingYaotti)
 	fmt.Println("")
+
+	usersResp, err := cli.GetUsers(ctx, 7, 50)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("usersResp: %+v\n", usersResp)
+	fmt.Println("")
 }

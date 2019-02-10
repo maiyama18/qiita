@@ -19,3 +19,12 @@ type User struct {
 	LinkedinID string `json:"linkedin_id"`
 	twitterID  string `json: "twitter_screen_name"`
 }
+
+type UsersResponse struct {
+	Users      []*User
+	PerPage    int
+	Page       int
+	FirstPage  int
+	LastPage   int
+	TotalCount int
+}
