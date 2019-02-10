@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -14,8 +15,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestNew(t *testing.T) {
@@ -66,9 +65,10 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func TestClient_GetUsers(t *testing.T) {
+func TestClient_GetFollowees(t *testing.T) {
 	tests := []struct {
 		desc         string
+		userID       string
 		page         int
 		perPage      int
 		responseFile string
@@ -85,58 +85,46 @@ func TestClient_GetUsers(t *testing.T) {
 	}{
 		{
 			desc:         "success",
-			page:         3,
-			perPage:      20,
-			responseFile: "users?page=3&per_page=20",
+			userID:       "muiscript",
+			page:         2,
+			perPage:      2,
+			responseFile: "users_muiscript_followees?page=2&per_page=2",
 
-			expectedRequestPath: "/users",
-			expectedRawQuery:    "page=3&per_page=20",
-			expectedPage:        3,
-			expectedPerPage:     20,
+			expectedRequestPath: "/users/muiscript/followees",
+			expectedRawQuery:    "page=2&per_page=2",
+			expectedPage:        2,
+			expectedPerPage:     2,
 			expectedFirstPage:   1,
-			expectedLastPage:    100,
-			expectedTotalCount:  326706,
-			expectedUsersLen:    20,
+			expectedLastPage:    6,
+			expectedTotalCount:  11,
+			expectedUsersLen:    2,
 		},
 		{
-			desc:         "failure_page_less_than_1",
+			desc:         "success_page_larger_than_last",
+			userID:       "muiscript",
+			page:         10,
+			perPage:      2,
+			responseFile: "users_muiscript_followees?page=10&per_page=2",
+
+			expectedRequestPath: "/users/muiscript/followees",
+			expectedRawQuery:    "page=10&per_page=2",
+			expectedPage:        10,
+			expectedPerPage:     2,
+			expectedFirstPage:   1,
+			expectedLastPage:    6,
+			expectedTotalCount:  11,
+			expectedUsersLen:    0,
+		},
+		{
+			desc:         "failure_page_less_than_100",
+			userID:       "muiscript",
 			page:         0,
-			perPage:      10,
-			responseFile: "users?page=0&per_page=10",
+			perPage:      2,
+			responseFile: "users_muiscript_followees?page=0&per_page=2",
 
-			expectedRequestPath: "/users",
-			expectedRawQuery:    "page=0&per_page=10",
+			expectedRequestPath: "/users/muiscript/followees",
+			expectedRawQuery:    "page=0&per_page=2",
 			expectedErrString:   "page parameter should be",
-		},
-		{
-			desc:         "failure_page_larger_than_100",
-			page:         101,
-			perPage:      10,
-			responseFile: "users?page=101&per_page=10",
-
-			expectedRequestPath: "/users",
-			expectedRawQuery:    "page=101&per_page=10",
-			expectedErrString:   "page parameter should be",
-		},
-		{
-			desc:         "failure_per_page_less_than_1",
-			page:         3,
-			perPage:      0,
-			responseFile: "users?page=3&per_page=0",
-
-			expectedRequestPath: "/users",
-			expectedRawQuery:    "page=3&per_page=0",
-			expectedErrString:   "perPage parameter should be",
-		},
-		{
-			desc:         "failure_per_page_larger_than_100",
-			page:         3,
-			perPage:      101,
-			responseFile: "users?page=3&per_page=101",
-
-			expectedRequestPath: "/users",
-			expectedRawQuery:    "page=3&per_page=101",
-			expectedErrString:   "perPage parameter should be",
 		},
 	}
 
@@ -153,7 +141,7 @@ func TestClient_GetUsers(t *testing.T) {
 				Logger:     log.New(ioutil.Discard, "", 0),
 			}
 
-			usersResp, err := cli.GetUsers(context.Background(), tt.page, tt.perPage)
+			usersResp, err := cli.GetFollowees(context.Background(), tt.userID, tt.page, tt.perPage)
 			if tt.expectedErrString == "" {
 				if !assert.Nil(t, err) {
 					t.FailNow()
@@ -229,6 +217,76 @@ func TestClient_GetUser(t *testing.T) {
 				assert.Equal(t, tt.expectedGithubID, user.GithubID)
 				assert.Equal(t, tt.expectedPostsCount, user.PostsCount)
 				assert.Equal(t, tt.expectedFollowersCount, user.FollowersCount)
+			} else {
+				if !assert.NotNil(t, err) {
+					t.FailNow()
+				}
+
+				assert.True(t, strings.Contains(err.Error(), tt.expectedErrString))
+			}
+
+		})
+	}
+}
+
+func TestClient_IsFollowingUser(t *testing.T) {
+	tests := []struct {
+		desc         string
+		targetUserID string
+		responseFile string
+
+		expectedRequestPath string
+		expectedIsFollowing bool
+		expectedErrString   string
+	}{
+		{
+			desc:         "success_following",
+			targetUserID: "mizchi",
+			responseFile: "users_mizchi_following",
+
+			expectedRequestPath: "/users/mizchi/following",
+			expectedIsFollowing: true,
+		},
+		{
+			desc:         "success_not_following",
+			targetUserID: "yaotti",
+			responseFile: "users_yaotti_following",
+
+			expectedRequestPath: "/users/yaotti/following",
+			expectedIsFollowing: false,
+		},
+		{
+			desc:         "failure_no_token",
+			targetUserID: "mizchi",
+			responseFile: "users_mizchi_following-no_token",
+
+			expectedRequestPath: "/users/mizchi/following",
+			expectedErrString:   "unauthorized",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			server := newTestServer(t, tt.responseFile, tt.expectedRequestPath, "")
+			defer server.Close()
+
+			serverURL, err := url.Parse(server.URL)
+			if !assert.Nil(t, err) {
+				t.FailNow()
+			}
+			cli := &Client{
+				URL:        serverURL,
+				HTTPClient: server.Client(),
+				Logger:     log.New(ioutil.Discard, "", 0),
+			}
+
+			isFollowing, err := cli.IsFollowingUser(context.Background(), tt.targetUserID)
+			if tt.expectedErrString == "" {
+				if !assert.Nil(t, err) {
+					t.FailNow()
+				}
+
+				assert.Equal(t, tt.expectedIsFollowing, isFollowing)
 			} else {
 				if !assert.NotNil(t, err) {
 					t.FailNow()
@@ -325,76 +383,6 @@ func TestClient_GetItem(t *testing.T) {
 				assert.Equal(t, tt.expectedUserID, item.User.ID)
 				assert.Equal(t, tt.expectedUserPermanentID, item.User.PermanentID)
 
-			} else {
-				if !assert.NotNil(t, err) {
-					t.FailNow()
-				}
-
-				assert.True(t, strings.Contains(err.Error(), tt.expectedErrString))
-			}
-
-		})
-	}
-}
-
-func TestClient_IsFollowingUser(t *testing.T) {
-	tests := []struct {
-		desc         string
-		targetUserID string
-		responseFile string
-
-		expectedRequestPath string
-		expectedIsFollowing bool
-		expectedErrString   string
-	}{
-		{
-			desc:         "success_following",
-			targetUserID: "mizchi",
-			responseFile: "users_mizchi_following",
-
-			expectedRequestPath: "/users/mizchi/following",
-			expectedIsFollowing: true,
-		},
-		{
-			desc:         "success_not_following",
-			targetUserID: "yaotti",
-			responseFile: "users_yaotti_following",
-
-			expectedRequestPath: "/users/yaotti/following",
-			expectedIsFollowing: false,
-		},
-		{
-			desc:         "failure_no_token",
-			targetUserID: "mizchi",
-			responseFile: "users_mizchi_following-no_token",
-
-			expectedRequestPath: "/users/mizchi/following",
-			expectedErrString:   "unauthorized",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.desc, func(t *testing.T) {
-			server := newTestServer(t, tt.responseFile, tt.expectedRequestPath, "")
-			defer server.Close()
-
-			serverURL, err := url.Parse(server.URL)
-			if !assert.Nil(t, err) {
-				t.FailNow()
-			}
-			cli := &Client{
-				URL:        serverURL,
-				HTTPClient: server.Client(),
-				Logger:     log.New(ioutil.Discard, "", 0),
-			}
-
-			isFollowing, err := cli.IsFollowingUser(context.Background(), tt.targetUserID)
-			if tt.expectedErrString == "" {
-				if !assert.Nil(t, err) {
-					t.FailNow()
-				}
-
-				assert.Equal(t, tt.expectedIsFollowing, isFollowing)
 			} else {
 				if !assert.NotNil(t, err) {
 					t.FailNow()

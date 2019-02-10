@@ -37,7 +37,7 @@ func main() {
 	fmt.Printf("following @yaotti: %+v\n", followingYaotti)
 	fmt.Println("")
 
-	usersResp, err := cli.GetUsers(ctx, 7, 50)
+	usersResp, err := cli.GetFollowees(ctx, "muiscript", 2, 2)
 	if err != nil {
 		panic(err)
 	}
