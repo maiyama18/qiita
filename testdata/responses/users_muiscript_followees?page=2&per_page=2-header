@@ -1,5 +1,5 @@
 HTTP/2 200 
-date: Sun, 10 Feb 2019 13:56:29 GMT
+date: Sun, 10 Feb 2019 15:39:35 GMT
 content-type: application/json; charset=utf-8
 server: nginx
 x-frame-options: SAMEORIGIN
@@ -8,15 +8,15 @@ x-content-type-options: nosniff
 x-download-options: noopen
 x-permitted-cross-domain-policies: none
 referrer-policy: strict-origin-when-cross-origin
-link: <https://qiita.com/api/v2/users/muiscript/followers?page=1&per_page=2>; rel="first", <https://qiita.com/api/v2/users/muiscript/followers?page=1&per_page=2>; rel="prev", <https://qiita.com/api/v2/users/muiscript/followers?page=3&per_page=2>; rel="next", <https://qiita.com/api/v2/users/muiscript/followers?page=6&per_page=2>; rel="last"
-total-count: 11
-etag: W/"4febbaad75a5a0b8700b2f60b80053d0"
+link: <https://qiita.com/api/v2/users/muiscript/followees?page=1&per_page=2>; rel="first", <https://qiita.com/api/v2/users/muiscript/followees?page=1&per_page=2>; rel="prev", <https://qiita.com/api/v2/users/muiscript/followees?page=3&per_page=2>; rel="next", <https://qiita.com/api/v2/users/muiscript/followees?page=3&per_page=2>; rel="last"
+total-count: 5
+etag: W/"015c70fdefd2d6656a3d1176d8871cef"
 cache-control: max-age=0, private, must-revalidate
 rate-limit: 60
-rate-remaining: 52
-rate-reset: 1549809929
+rate-remaining: 56
+rate-reset: 1549816751
 vary: Origin
-x-runtime: 0.145440
+x-runtime: 0.146779
 strict-transport-security: max-age=2592000
-x-request-id: 8a233ceb-0741-4807-8bab-907e5e30c81f
+x-request-id: 1df5f20c-4526-4488-91f8-b0cb58c24468
 

@@ -95,8 +95,8 @@ func TestClient_GetFollowees(t *testing.T) {
 			expectedPage:        2,
 			expectedPerPage:     2,
 			expectedFirstPage:   1,
-			expectedLastPage:    6,
-			expectedTotalCount:  11,
+			expectedLastPage:    3,
+			expectedTotalCount:  5,
 			expectedUsersLen:    2,
 		},
 		{
@@ -111,8 +111,8 @@ func TestClient_GetFollowees(t *testing.T) {
 			expectedPage:        10,
 			expectedPerPage:     2,
 			expectedFirstPage:   1,
-			expectedLastPage:    6,
-			expectedTotalCount:  11,
+			expectedLastPage:    3,
+			expectedTotalCount:  5,
 			expectedUsersLen:    0,
 		},
 		{

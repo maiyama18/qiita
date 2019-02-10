@@ -1,12 +1,12 @@
 HTTP/2 400 
-date: Sun, 10 Feb 2019 14:08:08 GMT
+date: Sun, 10 Feb 2019 15:39:10 GMT
 content-type: application/json
 server: nginx
 rate-limit: 60
-rate-remaining: 47
-rate-reset: 1549809929
+rate-remaining: 59
+rate-reset: 1549816750
 vary: Origin
-x-runtime: 0.390155
+x-runtime: 0.085848
 strict-transport-security: max-age=2592000
-x-request-id: d527fca2-3e0d-43e7-8e0a-322e3b8e8edd
+x-request-id: 0dae0190-7203-42a6-bd27-d53daa43061d
 

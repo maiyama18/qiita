@@ -29,7 +29,7 @@ item, err := qiita.GetItem(ctx, "b4ca1773580317e7112e")
 | :heavy_check_mark: | `GET` - `/users` | `GetUsers(ctx context.Context, page int, perPage int)` |
 | :heavy_check_mark: | `GET` - `/users/:user_id` | `GetUser(ctx context.Context, userID string)` |
 | :heavy_check_mark: | `GET` - `/users/:user_id/followees` | `GetFollowees(ctx context.Context, userID string, page int, perPage int)` |
-|  | `GET` - `/users/:user_id/followers` | |
+| :heavy_check_mark: | `GET` - `/users/:user_id/followers` | `GetFollowers(ctx context.Context, userID string, page int, perPage int)`|
 |  | `GET` - `/users/:user_id/items` | |
 |  | `GET` - `/users/:user_id/stocks` | |
 |  | `GET` - `/users/:user_id/following_tags` | |
