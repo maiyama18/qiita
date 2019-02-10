@@ -164,6 +164,105 @@ func TestClient_GetFollowees(t *testing.T) {
 	}
 }
 
+func TestClient_GetFollowers(t *testing.T) {
+	tests := []struct {
+		desc         string
+		userID       string
+		page         int
+		perPage      int
+		responseFile string
+
+		expectedRequestPath string
+		expectedRawQuery    string
+		expectedErrString   string
+		expectedPage        int
+		expectedPerPage     int
+		expectedFirstPage   int
+		expectedLastPage    int
+		expectedTotalCount  int
+		expectedUsersLen    int
+	}{
+		{
+			desc:         "success",
+			userID:       "muiscript",
+			page:         2,
+			perPage:      2,
+			responseFile: "users_muiscript_followers?page=2&per_page=2",
+
+			expectedRequestPath: "/users/muiscript/followers",
+			expectedRawQuery:    "page=2&per_page=2",
+			expectedPage:        2,
+			expectedPerPage:     2,
+			expectedFirstPage:   1,
+			expectedLastPage:    6,
+			expectedTotalCount:  11,
+			expectedUsersLen:    2,
+		},
+		{
+			desc:         "success_page_larger_than_last",
+			userID:       "muiscript",
+			page:         10,
+			perPage:      2,
+			responseFile: "users_muiscript_followers?page=10&per_page=2",
+
+			expectedRequestPath: "/users/muiscript/followers",
+			expectedRawQuery:    "page=10&per_page=2",
+			expectedPage:        10,
+			expectedPerPage:     2,
+			expectedFirstPage:   1,
+			expectedLastPage:    6,
+			expectedTotalCount:  11,
+			expectedUsersLen:    0,
+		},
+		{
+			desc:         "failure_page_less_than_100",
+			userID:       "muiscript",
+			page:         0,
+			perPage:      2,
+			responseFile: "users_muiscript_followers?page=0&per_page=2",
+
+			expectedRequestPath: "/users/muiscript/followers",
+			expectedRawQuery:    "page=0&per_page=2",
+			expectedErrString:   "page parameter should be",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			server := newTestServer(t, tt.responseFile, tt.expectedRequestPath, tt.expectedRawQuery)
+			defer server.Close()
+
+			serverURL, err := url.Parse(server.URL)
+			assert.Nil(t, err)
+			cli := &Client{
+				URL:        serverURL,
+				HTTPClient: server.Client(),
+				Logger:     log.New(ioutil.Discard, "", 0),
+			}
+
+			usersResp, err := cli.GetFollowers(context.Background(), tt.userID, tt.page, tt.perPage)
+			if tt.expectedErrString == "" {
+				if !assert.Nil(t, err) {
+					t.FailNow()
+				}
+
+				assert.Equal(t, tt.expectedPage, usersResp.Page)
+				assert.Equal(t, tt.expectedPerPage, usersResp.PerPage)
+				assert.Equal(t, tt.expectedFirstPage, usersResp.FirstPage)
+				assert.Equal(t, tt.expectedLastPage, usersResp.LastPage)
+				assert.Equal(t, tt.expectedTotalCount, usersResp.TotalCount)
+				assert.Equal(t, tt.expectedUsersLen, len(usersResp.Users))
+			} else {
+				if !assert.NotNil(t, err) {
+					t.FailNow()
+				}
+
+				assert.True(t, strings.Contains(err.Error(), tt.expectedErrString))
+			}
+		})
+	}
+}
+
 func TestClient_GetUser(t *testing.T) {
 	tests := []struct {
 		desc         string

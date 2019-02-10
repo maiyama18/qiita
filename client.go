@@ -113,6 +113,29 @@ func (c *Client) GetFollowees(ctx context.Context, userID string, page int, perP
 	return c.extractUsersResponse(resp, page, perPage)
 }
 
+func (c *Client) GetFollowers(ctx context.Context, userID string, page int, perPage int) (*UsersResponse, error) {
+	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
+		return nil, err
+	}
+
+	query := map[string]string{
+		"page":     strconv.Itoa(page),
+		"per_page": strconv.Itoa(perPage),
+	}
+	req, err := c.newRequest(ctx, "GET", path.Join("users", userID, "followers"), query, nil)
+	if err != nil {
+		return nil, err
+	}
+	c.Logger.Printf("send get request to %s\n", c.URL.String())
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.extractUsersResponse(resp, page, perPage)
+}
+
 func (c *Client) GetItem(ctx context.Context, itemID string) (*Item, error) {
 	req, err := c.newRequest(ctx, "GET", path.Join("items", itemID), nil, nil)
 	if err != nil {
