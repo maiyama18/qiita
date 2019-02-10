@@ -107,7 +107,6 @@ func (c *Client) extractUsersResponse(resp *http.Response, page int, perPage int
 	return usersResp, nil
 }
 
-
 func (c *Client) newRequest(ctx context.Context, method string, relativePath string, query map[string]string, body io.Reader) (*http.Request, error) {
 	url := *c.URL
 	url.Path = path.Join(url.Path, relativePath)
