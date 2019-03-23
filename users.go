@@ -193,7 +193,7 @@ func (c *Client) GetUserFollowers(ctx context.Context, userID string, page int, 
 	return constructUsersResponse(users, paginationInfo), nil
 }
 
-// GetUserItems ...
+// GetUserItems fetches the items created by the user having provided userID.
 //
 // GET /api/v2/users/:user_id/items
 // document: https://qiita.com/api/v2/docs#get-apiv2usersuser_iditems
@@ -202,11 +202,20 @@ func (c *Client) GetUserItems(ctx context.Context, userID string) ([]*Item, erro
 	return nil, nil
 }
 
-// GetUserStocks ...
+// GetUserStocks fetches the items stocked by the user having provided userID.
 //
 // GET /api/v2/users/:user_id/stocks
 // document: http://qiita.com/api/v2/docs#get-apiv2usersuser_idstocks
 func (c *Client) GetUserStocks(ctx context.Context, userID string) ([]*Item, error) {
+	// TODO: implement
+	return nil, nil
+}
+
+// GetUserFollowingTags fetches the tags followed by the user having provided userID.
+//
+// GET /api/v2/users/:user_id/following_tags
+// document: http://qiita.com/api/v2/docs#get-apiv2usersuser_idfollowing_tags
+func (c *Client) GetUserFollowingTags(ctx context.Context, userID string) ([]*Tag, error) {
 	// TODO: implement
 	return nil, nil
 }

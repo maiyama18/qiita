@@ -141,6 +141,16 @@ func (c *Client) CreateItemComment(ctx context.Context, itemID string, body stri
 	return nil, nil
 }
 
+// IsStockedItem returns true if the authenticated user has stocked the item having provided itemID.
+// This method requires authentication.
+//
+// GET /api/v2/items/:item_id/stock
+// document: http://qiita.com/api/v2/docs#get-apiv2itemsitem_idstock
+func (c *Client) IsStockedItem(ctx context.Context, itemID string) (bool, error) {
+	// TODO: implement
+	return false, nil
+}
+
 // StockItem add the item having provided itemID to the authenticated user's stock list.
 // This method requires authentication.
 //
@@ -159,14 +169,4 @@ func (c *Client) StockItem(ctx context.Context, itemID string) error {
 func (c *Client) UnstockItem(ctx context.Context, itemID string) error {
 	// TODO: implement
 	return nil
-}
-
-// IsStockedItem returns true if the authenticated user has stocked the item having provided itemID.
-// This method requires authentication.
-//
-// GET /api/v2/items/:item_id/stock
-// document: http://qiita.com/api/v2/docs#get-apiv2itemsitem_idstock
-func (c *Client) IsStockedItem(ctx context.Context, itemID string) (bool, error) {
-	// TODO: implement
-	return false, nil
 }
