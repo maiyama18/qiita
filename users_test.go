@@ -44,6 +44,17 @@ func TestClient_GetUser(t *testing.T) {
 			expectedPostsCount:     14,
 			expectedFollowersCount: 11,
 		},
+		{
+			desc:        "failure-not_exist",
+			inputUserID: "nonexistent",
+
+			mockResponseHeaderFile: "not_exist-header",
+			mockResponseBodyFile:   "not_exist-body",
+
+			expectedMethod:      http.MethodGet,
+			expectedRequestPath: "/users/nonexistent",
+			expectedErrString:   "not found",
+		},
 	}
 
 	for _, tt := range tests {
@@ -68,7 +79,7 @@ func TestClient_GetUser(t *testing.T) {
 					t.FailNow()
 				}
 
-				assert.True(t, strings.Contains(err.Error(), tt.expectedErrString))
+				assert.True(t, strings.Contains(err.Error(), tt.expectedErrString), fmt.Sprintf("'%s' should contain '%s'", err.Error(), tt.expectedErrString))
 			}
 
 		})

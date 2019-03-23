@@ -74,8 +74,8 @@ func parseHeader(t *testing.T, headerPath string) (int, map[string]string) {
 	kvs := make(map[string]string)
 	var statusCode int
 	for sc.Scan() {
-		line := sc.Text()
-		if len(line) == 0 {
+		line := strings.TrimSpace(sc.Text())
+		if line == "" {
 			continue
 		}
 
