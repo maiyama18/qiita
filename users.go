@@ -211,8 +211,8 @@ func (c *Client) GetUsersStocks(ctx context.Context, userID string) ([]*Item, er
 	return nil, nil
 }
 
-// IsFollowingUser returns true if the authenticated user is following the user having provided userID
-// This method requires authentication
+// IsFollowingUser returns true if the authenticated user is following the user having provided userID.
+// This method requires authentication.
 //
 // GET /api/v2/users/:user_id/following
 // document: https://qiita.com/api/v2/docs#get-apiv2usersuser_idfollowing
