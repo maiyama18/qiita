@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"net/url"
 	"strings"
 	"testing"
@@ -19,6 +20,7 @@ func TestClient_GetItem(t *testing.T) {
 		id           string
 		responseFile string
 
+		expectedMethod          string
 		expectedRequestPath     string
 		expectedErrString       string
 		expectedID              string
@@ -39,6 +41,7 @@ func TestClient_GetItem(t *testing.T) {
 			id:           "b4ca1773580317e7112e",
 			responseFile: "items_b4ca1773580317e7112e",
 
+			expectedMethod:          http.MethodGet,
 			expectedRequestPath:     "/items/b4ca1773580317e7112e",
 			expectedID:              "b4ca1773580317e7112e",
 			expectedTitle:           "react-router@v4を使ってみよう：シンプルなtutorial",
@@ -57,6 +60,7 @@ func TestClient_GetItem(t *testing.T) {
 			id:           "nonexistent",
 			responseFile: "items_nonexistent",
 
+			expectedMethod:      http.MethodGet,
 			expectedRequestPath: "/items/nonexistent",
 			expectedErrString:   "not found",
 		},
@@ -64,7 +68,7 @@ func TestClient_GetItem(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			server := newTestServer(t, tt.responseFile, tt.expectedRequestPath, "")
+			server := newTestServer(t, tt.responseFile, tt.expectedMethod, tt.expectedRequestPath, "")
 			defer server.Close()
 
 			serverURL, err := url.Parse(server.URL)

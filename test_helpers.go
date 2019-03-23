@@ -13,8 +13,11 @@ import (
 	"testing"
 )
 
-func newTestServer(t *testing.T, responseFile string, expectedRequestPath string, expectedRawQuery string) *httptest.Server {
+func newTestServer(t *testing.T, responseFile string, expectedMethod, expectedRequestPath, expectedRawQuery string) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if !assert.Equal(t, expectedMethod, req.Method) {
+			t.FailNow()
+		}
 		if !assert.Equal(t, expectedRequestPath, req.URL.Path) {
 			t.FailNow()
 		}

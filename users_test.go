@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"net/url"
 	"strings"
 	"testing"
@@ -18,6 +19,7 @@ func TestClient_GetFollowees(t *testing.T) {
 		perPage      int
 		responseFile string
 
+		expectedMethod      string
 		expectedRequestPath string
 		expectedRawQuery    string
 		expectedErrString   string
@@ -35,6 +37,7 @@ func TestClient_GetFollowees(t *testing.T) {
 			perPage:      2,
 			responseFile: "users_muiscript_followees?page=2&per_page=2",
 
+			expectedMethod:      http.MethodGet,
 			expectedRequestPath: "/users/muiscript/followees",
 			expectedRawQuery:    "page=2&per_page=2",
 			expectedPage:        2,
@@ -51,6 +54,7 @@ func TestClient_GetFollowees(t *testing.T) {
 			perPage:      2,
 			responseFile: "users_muiscript_followees?page=10&per_page=2",
 
+			expectedMethod:      http.MethodGet,
 			expectedRequestPath: "/users/muiscript/followees",
 			expectedRawQuery:    "page=10&per_page=2",
 			expectedPage:        10,
@@ -67,6 +71,7 @@ func TestClient_GetFollowees(t *testing.T) {
 			perPage:      2,
 			responseFile: "users_muiscript_followees?page=0&per_page=2",
 
+			expectedMethod:      http.MethodGet,
 			expectedRequestPath: "/users/muiscript/followees",
 			expectedRawQuery:    "page=0&per_page=2",
 			expectedErrString:   "page parameter should be",
@@ -75,7 +80,7 @@ func TestClient_GetFollowees(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			server := newTestServer(t, tt.responseFile, tt.expectedRequestPath, tt.expectedRawQuery)
+			server := newTestServer(t, tt.responseFile, tt.expectedMethod, tt.expectedRequestPath, tt.expectedRawQuery)
 			defer server.Close()
 
 			serverURL, err := url.Parse(server.URL)
@@ -86,7 +91,7 @@ func TestClient_GetFollowees(t *testing.T) {
 				Logger:     log.New(ioutil.Discard, "", 0),
 			}
 
-			usersResp, err := cli.GetFollowees(context.Background(), tt.userID, tt.page, tt.perPage)
+			usersResp, err := cli.GetUserFollowees(context.Background(), tt.userID, tt.page, tt.perPage)
 			if tt.expectedErrString == "" {
 				if !assert.Nil(t, err) {
 					t.FailNow()
@@ -117,6 +122,7 @@ func TestClient_GetFollowers(t *testing.T) {
 		perPage      int
 		responseFile string
 
+		expectedMethod      string
 		expectedRequestPath string
 		expectedRawQuery    string
 		expectedErrString   string
@@ -134,6 +140,7 @@ func TestClient_GetFollowers(t *testing.T) {
 			perPage:      2,
 			responseFile: "users_muiscript_followers?page=2&per_page=2",
 
+			expectedMethod:      http.MethodGet,
 			expectedRequestPath: "/users/muiscript/followers",
 			expectedRawQuery:    "page=2&per_page=2",
 			expectedPage:        2,
@@ -150,6 +157,7 @@ func TestClient_GetFollowers(t *testing.T) {
 			perPage:      2,
 			responseFile: "users_muiscript_followers?page=10&per_page=2",
 
+			expectedMethod:      http.MethodGet,
 			expectedRequestPath: "/users/muiscript/followers",
 			expectedRawQuery:    "page=10&per_page=2",
 			expectedPage:        10,
@@ -166,6 +174,7 @@ func TestClient_GetFollowers(t *testing.T) {
 			perPage:      2,
 			responseFile: "users_muiscript_followers?page=0&per_page=2",
 
+			expectedMethod:      http.MethodGet,
 			expectedRequestPath: "/users/muiscript/followers",
 			expectedRawQuery:    "page=0&per_page=2",
 			expectedErrString:   "page parameter should be",
@@ -174,7 +183,7 @@ func TestClient_GetFollowers(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			server := newTestServer(t, tt.responseFile, tt.expectedRequestPath, tt.expectedRawQuery)
+			server := newTestServer(t, tt.responseFile, tt.expectedMethod, tt.expectedRequestPath, tt.expectedRawQuery)
 			defer server.Close()
 
 			serverURL, err := url.Parse(server.URL)
@@ -185,7 +194,7 @@ func TestClient_GetFollowers(t *testing.T) {
 				Logger:     log.New(ioutil.Discard, "", 0),
 			}
 
-			usersResp, err := cli.GetFollowers(context.Background(), tt.userID, tt.page, tt.perPage)
+			usersResp, err := cli.GetUserFollowers(context.Background(), tt.userID, tt.page, tt.perPage)
 			if tt.expectedErrString == "" {
 				if !assert.Nil(t, err) {
 					t.FailNow()
@@ -214,6 +223,7 @@ func TestClient_GetUser(t *testing.T) {
 		id           string
 		responseFile string
 
+		expectedMethod         string
 		expectedRequestPath    string
 		expectedErrString      string
 		expectedID             string
@@ -227,6 +237,7 @@ func TestClient_GetUser(t *testing.T) {
 			id:           "muiscript",
 			responseFile: "users_muiscript",
 
+			expectedMethod:         http.MethodGet,
 			expectedRequestPath:    "/users/muiscript",
 			expectedID:             "muiscript",
 			expectedPermanentID:    159260,
@@ -238,7 +249,7 @@ func TestClient_GetUser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			server := newTestServer(t, tt.responseFile, tt.expectedRequestPath, "")
+			server := newTestServer(t, tt.responseFile, tt.expectedMethod, tt.expectedRequestPath, "")
 			defer server.Close()
 
 			serverURL, err := url.Parse(server.URL)
@@ -279,6 +290,7 @@ func TestClient_IsFollowingUser(t *testing.T) {
 		targetUserID string
 		responseFile string
 
+		expectedMethod      string
 		expectedRequestPath string
 		expectedIsFollowing bool
 		expectedErrString   string
@@ -288,6 +300,7 @@ func TestClient_IsFollowingUser(t *testing.T) {
 			targetUserID: "mizchi",
 			responseFile: "users_mizchi_following",
 
+			expectedMethod:      http.MethodGet,
 			expectedRequestPath: "/users/mizchi/following",
 			expectedIsFollowing: true,
 		},
@@ -296,6 +309,7 @@ func TestClient_IsFollowingUser(t *testing.T) {
 			targetUserID: "yaotti",
 			responseFile: "users_yaotti_following",
 
+			expectedMethod:      http.MethodGet,
 			expectedRequestPath: "/users/yaotti/following",
 			expectedIsFollowing: false,
 		},
@@ -304,6 +318,7 @@ func TestClient_IsFollowingUser(t *testing.T) {
 			targetUserID: "mizchi",
 			responseFile: "users_mizchi_following-no_token",
 
+			expectedMethod:      http.MethodGet,
 			expectedRequestPath: "/users/mizchi/following",
 			expectedErrString:   "unauthorized",
 		},
@@ -311,7 +326,7 @@ func TestClient_IsFollowingUser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			server := newTestServer(t, tt.responseFile, tt.expectedRequestPath, "")
+			server := newTestServer(t, tt.responseFile, tt.expectedMethod, tt.expectedRequestPath, "")
 			defer server.Close()
 
 			serverURL, err := url.Parse(server.URL)
