@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/muiscript/qiita"
 	"log"
 	"os"
 )
 
 // this main function works as integration test of this package
 func main() {
-	cli, err := New(os.Getenv("QIITA_ACCESS_TOKEN"), log.New(os.Stdout, "log", log.LstdFlags))
+	cli, err := qiita.New(os.Getenv("QIITA_ACCESS_TOKEN"), log.New(os.Stdout, "log", log.LstdFlags))
 	if err != nil {
 		panic(err)
 	}

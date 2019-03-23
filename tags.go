@@ -1,4 +1,4 @@
-package main
+package qiita
 
 // Tag represents a tag for a qiita item.
 type Tag struct {
