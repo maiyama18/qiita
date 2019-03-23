@@ -25,8 +25,14 @@ type Item struct {
 	LikesCount     int `json:"likes_count"`
 	ReactionsCount int `json:"reactions_count"`
 
-	User *User  `json:"user"`
-	Tags []*Tag `json:"tags"`
+	User *User      `json:"user"`
+	Tags []*ItemTag `json:"tags"`
+}
+
+// ItemTag represents a tag for a qiita item.
+type ItemTag struct {
+	Name     string   `json:"name"`
+	Versions []string `json:"versions"`
 }
 
 // ItemDraft represents an item to be posted for qiita.

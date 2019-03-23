@@ -239,7 +239,8 @@ func (c *Client) IsFollowingUser(ctx context.Context, userID string) (bool, erro
 	}
 }
 
-// FollowUser ...
+// FollowUser follows the user having provided userID.
+// This method requires authentication.
 //
 // PUT /api/v2/users/:user_id/following
 // document: http://qiita.com/api/v2/docs#put-apiv2usersuser_idfollowing
@@ -248,7 +249,8 @@ func (c *Client) FollowUser(ctx context.Context, userID string) error {
 	return nil
 }
 
-// UnfollowUser ...
+// UnfollowUser unfollows the user having provided userID.
+// This method requires authentication.
 //
 // DELETE /api/v2/users/:user_id/following
 // document: http://qiita.com/api/v2/docs#delete-apiv2usersuser_idfollowing
