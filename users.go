@@ -193,6 +193,16 @@ func (c *Client) GetFollowers(ctx context.Context, userID string, page int, perP
 	return constructUsersResponse(users, paginationInfo), nil
 }
 
+func (c *Client) GetUsersItems(ctx context.Context, userID string) ([]*Item, error) {
+	// TODO: implement
+	return nil, nil
+}
+
+func (c *Client) GetUsersStocks(ctx context.Context, userID string) ([]*Item, error) {
+	// TODO: implement
+	return nil, nil
+}
+
 // IsFollowingUser returns true if the authenticated user is following the user having provided userID
 // This method requires authentication
 //
@@ -219,6 +229,16 @@ func (c *Client) IsFollowingUser(ctx context.Context, userID string) (bool, erro
 	} else {
 		return false, nil
 	}
+}
+
+func (c *Client) FollowUser(ctx context.Context, userID string) error {
+	// TODO: implement
+	return nil
+}
+
+func (c *Client) UnfollowUser(ctx context.Context, userID string) error {
+	// TODO: implement
+	return nil
 }
 
 func constructUsersResponse(users []*User, info *paginationInfo) *UsersResponse {
