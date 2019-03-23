@@ -193,11 +193,19 @@ func (c *Client) GetFollowers(ctx context.Context, userID string, page int, perP
 	return constructUsersResponse(users, paginationInfo), nil
 }
 
+// GetUsersItems ...
+//
+// GET /api/v2/users/:user_id/items
+// document: https://qiita.com/api/v2/docs#get-apiv2usersuser_iditems
 func (c *Client) GetUsersItems(ctx context.Context, userID string) ([]*Item, error) {
 	// TODO: implement
 	return nil, nil
 }
 
+// GetUsersStocks ...
+//
+// GET /api/v2/users/:user_id/stocks
+// document: http://qiita.com/api/v2/docs#get-apiv2usersuser_idstocks
 func (c *Client) GetUsersStocks(ctx context.Context, userID string) ([]*Item, error) {
 	// TODO: implement
 	return nil, nil
@@ -231,11 +239,19 @@ func (c *Client) IsFollowingUser(ctx context.Context, userID string) (bool, erro
 	}
 }
 
+// FollowUser ...
+//
+// PUT /api/v2/users/:user_id/following
+// document: http://qiita.com/api/v2/docs#put-apiv2usersuser_idfollowing
 func (c *Client) FollowUser(ctx context.Context, userID string) error {
 	// TODO: implement
 	return nil
 }
 
+// UnfollowUser ...
+//
+// DELETE /api/v2/users/:user_id/following
+// document: http://qiita.com/api/v2/docs#delete-apiv2usersuser_idfollowing
 func (c *Client) UnfollowUser(ctx context.Context, userID string) error {
 	// TODO: implement
 	return nil
