@@ -101,12 +101,12 @@ func (c *Client) GetItemStockers(ctx context.Context, itemID string) ([]*User, e
 	return nil, nil
 }
 
-// PostItem posts the item.
+// CreateItem posts the item.
 // This method requires authentication.
 //
 // POST /api/v2/items
 // document: http://qiita.com/api/v2/docs#post-apiv2items
-func (c *Client) PostItem(ctx context.Context, title, body string, private, tweet bool) (*Item, error) {
+func (c *Client) CreateItem(ctx context.Context, title, body string, private, tweet bool) (*Item, error) {
 	// TODO: implement
 	return nil, nil
 }
@@ -131,12 +131,12 @@ func (c *Client) DeleteItem(ctx context.Context, itemID string) error {
 	return nil
 }
 
-// PostItemComment post comments on the item having provided itemID.
+// CreateItemComment post comments on the item having provided itemID.
 // This method requires authentication.
 //
 // POST /api/v2/items/:item_id/comments
 // document: http://qiita.com/api/v2/docs#post-apiv2itemsitem_idcomments
-func (c *Client) PostItemComment(ctx context.Context, itemID string, body string) (*Comment, error) {
+func (c *Client) CreateItemComment(ctx context.Context, itemID string, body string) (*Comment, error) {
 	// TODO: implement
 	return nil, nil
 }

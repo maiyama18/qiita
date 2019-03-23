@@ -117,12 +117,12 @@ func (c *Client) GetUsers(ctx context.Context, page int, perPage int) (*UsersRes
 	return constructUsersResponse(users, paginationInfo), nil
 }
 
-// GetFollowees fetches all the followees of the user having provided userID.
+// GetUserFollowees fetches all the followees of the user having provided userID.
 // The number of users included in one response and the page number should be provided.
 //
 // GET /api/v2/users/:user_id/followees
 // document: http://qiita.com/api/v2/docs#get-apiv2usersuser_idfollowees
-func (c *Client) GetFollowees(ctx context.Context, userID string, page int, perPage int) (*UsersResponse, error) {
+func (c *Client) GetUserFollowees(ctx context.Context, userID string, page int, perPage int) (*UsersResponse, error) {
 	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
 		return nil, err
 	}
@@ -155,12 +155,12 @@ func (c *Client) GetFollowees(ctx context.Context, userID string, page int, perP
 	return constructUsersResponse(users, paginationInfo), nil
 }
 
-// GetFollowers fetches all the followers of the user having provided userID.
+// GetUserFollowers fetches all the followers of the user having provided userID.
 // The number of users included in one response and the page number should be provided.
 //
 // GET /api/v2/users/:user_id/followers
 // document: https://qiita.com/api/v2/docs#get-apiv2usersuser_idfollowers
-func (c *Client) GetFollowers(ctx context.Context, userID string, page int, perPage int) (*UsersResponse, error) {
+func (c *Client) GetUserFollowers(ctx context.Context, userID string, page int, perPage int) (*UsersResponse, error) {
 	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
 		return nil, err
 	}
@@ -259,22 +259,22 @@ func (c *Client) UnfollowUser(ctx context.Context, userID string) error {
 	return nil
 }
 
-// AuthenticatedUser returns the user who is associated with provided access token.
+// GetAuthenticatedUser returns the user who is associated with provided access token.
 // This method requires authentication.
 //
 // GET /api/v2/authenticated_user
 // document: http://qiita.com/api/v2/docs#get-apiv2authenticated_user
-func (c *Client) AuthenticatedUser(ctx context.Context) (*User, error) {
+func (c *Client) GetAuthenticatedUser(ctx context.Context) (*User, error) {
 	// TODO: implement
 	return nil, nil
 }
 
-// AuthenticatedUserItems fetches the item created by the authenticated user.
+// GetAuthenticatedUserItems fetches the item created by the authenticated user.
 // This method requires authentication.
 //
 // GET /api/v2/authenticated_user/items
 // document: http://qiita.com/api/v2/docs#get-apiv2authenticated_useritems
-func (c *Client) AuthenticatedUserItems(ctx context.Context) ([]*Item, error) {
+func (c *Client) GetAuthenticatedUserItems(ctx context.Context) ([]*Item, error) {
 	// TODO: implement
 	return nil, nil
 }
