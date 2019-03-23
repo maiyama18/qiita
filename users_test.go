@@ -10,6 +10,88 @@ import (
 	"testing"
 )
 
+func TestClient_GetUsers(t *testing.T) {
+	mockFilesBaseDir := path.Join("testdata", "responses", "users", "GetUsers")
+
+	tests := []struct {
+		desc         string
+		inputPage    int
+		inputPerPage int
+
+		mockResponseHeaderFile string
+		mockResponseBodyFile   string
+
+		expectedMethod      string
+		expectedRequestPath string
+		expectedRawQuery    string
+		expectedErrString   string
+		expectedPage        int
+		expectedPerPage     int
+		expectedFirstPage   int
+		expectedLastPage    int
+		expectedTotalCount  int
+		expectedUsersLen    int
+	}{
+		{
+			desc:         "success",
+			inputPage:    3,
+			inputPerPage: 20,
+
+			mockResponseHeaderFile: "success-header",
+			mockResponseBodyFile:   "success-body",
+
+			expectedMethod:      http.MethodGet,
+			expectedRequestPath: "/users",
+			expectedRawQuery:    "page=3&per_page=20",
+			expectedPage:        3,
+			expectedPerPage:     20,
+			expectedFirstPage:   1,
+			expectedLastPage:    100,
+			expectedTotalCount:  326706,
+			expectedUsersLen:    20,
+		},
+		{
+			desc:         "failure-out_of_range",
+			inputPage:    3,
+			inputPerPage: 101,
+
+			mockResponseHeaderFile: "out_of_range-header",
+			mockResponseBodyFile:   "out_of_range-body",
+
+			expectedMethod:      http.MethodGet,
+			expectedRequestPath: "/users",
+			expectedRawQuery:    "page=3&per_page=101",
+			expectedErrString:   "perPage parameter should be",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			cli, teardown := setup(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, tt.expectedRawQuery)
+			defer teardown()
+
+			usersResp, err := cli.GetUsers(context.Background(), tt.inputPage, tt.inputPerPage)
+			if tt.expectedErrString == "" {
+				if !assert.Nil(t, err) {
+					t.FailNow()
+				}
+
+				assert.Equal(t, tt.expectedPage, usersResp.Page)
+				assert.Equal(t, tt.expectedPerPage, usersResp.PerPage)
+				assert.Equal(t, tt.expectedFirstPage, usersResp.FirstPage)
+				assert.Equal(t, tt.expectedLastPage, usersResp.LastPage)
+				assert.Equal(t, tt.expectedTotalCount, usersResp.TotalCount)
+				assert.Equal(t, tt.expectedUsersLen, len(usersResp.Users))
+			} else {
+				if !assert.NotNil(t, err) {
+					t.FailNow()
+				}
+
+				assert.True(t, strings.Contains(err.Error(), tt.expectedErrString), fmt.Sprintf("'%s' should contain '%s'", err.Error(), tt.expectedErrString))
+			}
+		})
+	}
+}
+
 func TestClient_GetUser(t *testing.T) {
 	mockFilesBaseDir := path.Join("testdata", "responses", "users", "GetUser")
 
@@ -22,6 +104,7 @@ func TestClient_GetUser(t *testing.T) {
 
 		expectedMethod         string
 		expectedRequestPath    string
+		expectedRawQuery       string
 		expectedErrString      string
 		expectedID             string
 		expectedPermanentID    int
@@ -59,7 +142,7 @@ func TestClient_GetUser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			cli, teardown := setup(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, "")
+			cli, teardown := setup(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, tt.expectedRawQuery)
 			defer teardown()
 
 			user, err := cli.GetUser(context.Background(), tt.inputUserID)
@@ -98,6 +181,7 @@ func TestClient_IsFollowingUser(t *testing.T) {
 
 		expectedMethod      string
 		expectedRequestPath string
+		expectedRawQuery    string
 		expectedIsFollowing bool
 		expectedErrString   string
 	}{
@@ -124,6 +208,17 @@ func TestClient_IsFollowingUser(t *testing.T) {
 			expectedIsFollowing: false,
 		},
 		{
+			desc:        "failure-not_exist",
+			inputUserID: "nonexistent",
+
+			mockResponseHeaderFile: "not_exist-header",
+			mockResponseBodyFile:   "not_exist-body",
+
+			expectedMethod:      http.MethodGet,
+			expectedRequestPath: "/users/nonexistent/following",
+			expectedIsFollowing: false,
+		},
+		{
 			desc:        "failure-no_token",
 			inputUserID: "mizchi",
 
@@ -138,7 +233,7 @@ func TestClient_IsFollowingUser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			cli, teardown := setup(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, "")
+			cli, teardown := setup(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, tt.expectedRawQuery)
 			defer teardown()
 
 			isFollowing, err := cli.IsFollowingUser(context.Background(), tt.inputUserID)

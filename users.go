@@ -141,6 +141,14 @@ func (c *Client) GetUserFollowees(ctx context.Context, userID string, page int, 
 	if err != nil {
 		return nil, err
 	}
+	if resp.StatusCode < 200 || 300 <= resp.StatusCode {
+		switch resp.StatusCode {
+		case http.StatusNotFound:
+			return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, resp.StatusCode)
+		default:
+			return nil, fmt.Errorf("unknown error (status = %d)", resp.StatusCode)
+		}
+	}
 
 	var users []*User
 	if err := c.decodeBody(resp, &users); err != nil {
@@ -237,14 +245,15 @@ func (c *Client) IsFollowingUser(ctx context.Context, userID string) (bool, erro
 		return false, err
 	}
 
-	if resp.StatusCode == http.StatusUnauthorized {
-		return false, fmt.Errorf("unauthorized. you may have provided no/invalid access token (status = %d)", resp.StatusCode)
-	}
-
-	if resp.StatusCode == http.StatusNoContent {
+	switch resp.StatusCode {
+	case http.StatusNoContent:
 		return true, nil
-	} else {
+	case http.StatusNotFound:
 		return false, nil
+	case http.StatusUnauthorized:
+		return false, fmt.Errorf("unauthorized. you may have provided no/invalid access token (status = %d)", resp.StatusCode)
+	default:
+		return false, fmt.Errorf("unknown error (status = %d)", resp.StatusCode)
 	}
 }
 
