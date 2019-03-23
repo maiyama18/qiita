@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-// User represents a qiita user
+// User represents a qiita user.
 type User struct {
 	ID           string `json:"id"`
 	PermanentID  int    `json:"permanent_id"`
@@ -29,7 +29,7 @@ type User struct {
 	TwitterID  string `json:"twitter_screen_name"`
 }
 
-// UsersResponse represents a response of qiita API which returns multiple users
+// UsersResponse represents a response from qiita API which returns multiple users.
 type UsersResponse struct {
 	Users      []*User
 	PerPage    int
@@ -47,7 +47,7 @@ type paginationInfo struct {
 	TotalCount int
 }
 
-// GetUser fetches a user having provided userID
+// GetUser fetches the user having provided userID.
 //
 // GET /api/v2/users/:user_id
 // document: https://qiita.com/api/v2/docs#get-apiv2usersuser_id
@@ -79,8 +79,8 @@ func (c *Client) GetUser(ctx context.Context, userID string) (*User, error) {
 	return &user, nil
 }
 
-// GetUsers fetches all the users
-// The number of users included in one response and the page number should be provided
+// GetUsers fetches all the users.
+// The number of users included in one response and the page number should be provided.
 //
 // GET /api/v2/users
 // document: https://qiita.com/api/v2/docs#get-apiv2users
@@ -117,8 +117,8 @@ func (c *Client) GetUsers(ctx context.Context, page int, perPage int) (*UsersRes
 	return constructUsersResponse(users, paginationInfo), nil
 }
 
-// GetFollowees fetches all the followees of the user having provided userID
-// The number of users included in one response and the page number should be provided
+// GetFollowees fetches all the followees of the user having provided userID.
+// The number of users included in one response and the page number should be provided.
 //
 // GET /api/v2/users/:user_id/followees
 // document: http://qiita.com/api/v2/docs#get-apiv2usersuser_idfollowees
@@ -155,8 +155,8 @@ func (c *Client) GetFollowees(ctx context.Context, userID string, page int, perP
 	return constructUsersResponse(users, paginationInfo), nil
 }
 
-// GetFollowers fetches all the followers of the user having provided userID
-// The number of users included in one response and the page number should be provided
+// GetFollowers fetches all the followers of the user having provided userID.
+// The number of users included in one response and the page number should be provided.
 //
 // GET /api/v2/users/:user_id/followers
 // document: https://qiita.com/api/v2/docs#get-apiv2usersuser_idfollowers
