@@ -4,10 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
-	"log"
 	"net/http"
-	"net/url"
 	"path"
 	"strings"
 	"testing"
@@ -63,11 +60,11 @@ func TestClient_GetItem(t *testing.T) {
 			expectedUserPermanentID: 159260,
 		},
 		{
-			desc:        "failure_nonexistent_item",
+			desc:        "failure-not_exist",
 			inputItemID: "nonexistent",
 
-			mockResponseHeaderFile: "nonexistent-header",
-			mockResponseBodyFile:   "nonexistent-body",
+			mockResponseHeaderFile: "not_exist-header",
+			mockResponseBodyFile:   "not_exist-body",
 
 			expectedMethod:      http.MethodGet,
 			expectedRequestPath: "/items/nonexistent",
@@ -77,18 +74,8 @@ func TestClient_GetItem(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			server := newTestServer(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, "")
-			defer server.Close()
-
-			serverURL, err := url.Parse(server.URL)
-			if !assert.Nil(t, err) {
-				t.FailNow()
-			}
-			cli := &Client{
-				URL:        serverURL,
-				HTTPClient: server.Client(),
-				Logger:     log.New(ioutil.Discard, "", 0),
-			}
+			cli, teardown := setup(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, "")
+			defer teardown()
 
 			item, err := cli.GetItem(context.Background(), tt.inputItemID)
 			if tt.expectedErrString == "" {

@@ -4,14 +4,36 @@ import (
 	"bufio"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path"
 	"strconv"
 	"strings"
 	"testing"
 )
+
+func setup(t *testing.T, mockFilesBaseDir, mockResponseHeaderFile, mockResponseBodyFile, expectedMethod, expectedRequestPath, expectedRawQuery string) (*Client, func()) {
+	server := newTestServer(t, mockFilesBaseDir, mockResponseHeaderFile, mockResponseBodyFile, expectedMethod, expectedRequestPath, expectedRawQuery)
+
+	serverURL, err := url.Parse(server.URL)
+	if !assert.Nil(t, err) {
+		t.FailNow()
+	}
+	cli := &Client{
+		URL:        serverURL,
+		HTTPClient: server.Client(),
+		Logger:     log.New(ioutil.Discard, "", 0),
+	}
+
+	teardown := func() {
+		server.Close()
+	}
+
+	return cli, teardown
+}
 
 func newTestServer(t *testing.T, mockFilesBaseDir, mockResponseHeaderFile, mockResponseBodyFile, expectedMethod, expectedRequestPath, expectedRawQuery string) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
