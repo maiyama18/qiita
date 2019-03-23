@@ -259,6 +259,26 @@ func (c *Client) UnfollowUser(ctx context.Context, userID string) error {
 	return nil
 }
 
+// AuthenticatedUser returns the user who is associated with provided access token.
+// This method requires authentication.
+//
+// GET /api/v2/authenticated_user
+// document: http://qiita.com/api/v2/docs#get-apiv2authenticated_user
+func (c *Client) AuthenticatedUser(ctx context.Context) (*User, error) {
+	// TODO: implement
+	return nil, nil
+}
+
+// AuthenticatedUserItems fetches the item created by the authenticated user.
+// This method requires authentication.
+//
+// GET /api/v2/authenticated_user/items
+// document: http://qiita.com/api/v2/docs#get-apiv2authenticated_useritems
+func (c *Client) AuthenticatedUserItems(ctx context.Context) ([]*Item, error) {
+	// TODO: implement
+	return nil, nil
+}
+
 func constructUsersResponse(users []*User, info *paginationInfo) *UsersResponse {
 	return &UsersResponse{
 		Users:      users,
