@@ -193,20 +193,20 @@ func (c *Client) GetFollowers(ctx context.Context, userID string, page int, perP
 	return constructUsersResponse(users, paginationInfo), nil
 }
 
-// GetUsersItems ...
+// GetUserItems ...
 //
 // GET /api/v2/users/:user_id/items
 // document: https://qiita.com/api/v2/docs#get-apiv2usersuser_iditems
-func (c *Client) GetUsersItems(ctx context.Context, userID string) ([]*Item, error) {
+func (c *Client) GetUserItems(ctx context.Context, userID string) ([]*Item, error) {
 	// TODO: implement
 	return nil, nil
 }
 
-// GetUsersStocks ...
+// GetUserStocks ...
 //
 // GET /api/v2/users/:user_id/stocks
 // document: http://qiita.com/api/v2/docs#get-apiv2usersuser_idstocks
-func (c *Client) GetUsersStocks(ctx context.Context, userID string) ([]*Item, error) {
+func (c *Client) GetUserStocks(ctx context.Context, userID string) ([]*Item, error) {
 	// TODO: implement
 	return nil, nil
 }
