@@ -28,3 +28,22 @@ type UsersResponse struct {
 	LastPage   int
 	TotalCount int
 }
+
+type PaginationInfo struct {
+	PerPage    int
+	Page       int
+	FirstPage  int
+	LastPage   int
+	TotalCount int
+}
+
+func constructUsersResponse(users []*User, info *PaginationInfo) *UsersResponse {
+	return &UsersResponse{
+		Users:      users,
+		PerPage:    info.PerPage,
+		Page:       info.Page,
+		FirstPage:  info.FirstPage,
+		LastPage:   info.LastPage,
+		TotalCount: info.TotalCount,
+	}
+}

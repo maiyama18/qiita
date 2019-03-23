@@ -39,29 +39,6 @@ func New(accessToken string, logger *log.Logger) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) GetUsers(ctx context.Context, page int, perPage int) (*UsersResponse, error) {
-	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
-		return nil, err
-	}
-
-	query := map[string]string{
-		"page":     strconv.Itoa(page),
-		"per_page": strconv.Itoa(perPage),
-	}
-	req, err := c.newRequest(ctx, "GET", "users", query, nil)
-	if err != nil {
-		return nil, err
-	}
-	c.Logger.Printf("send get request to %s\n", c.URL.String())
-
-	resp, err := c.HTTPClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.extractUsersResponse(resp, page, perPage)
-}
-
 func (c *Client) GetUser(ctx context.Context, userID string) (*User, error) {
 	req, err := c.newRequest(ctx, "GET", path.Join("users", userID), nil, nil)
 	if err != nil {
@@ -90,6 +67,39 @@ func (c *Client) GetUser(ctx context.Context, userID string) (*User, error) {
 	return &user, nil
 }
 
+func (c *Client) GetUsers(ctx context.Context, page int, perPage int) (*UsersResponse, error) {
+	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
+		return nil, err
+	}
+
+	query := map[string]string{
+		"page":     strconv.Itoa(page),
+		"per_page": strconv.Itoa(perPage),
+	}
+	req, err := c.newRequest(ctx, "GET", "users", query, nil)
+	if err != nil {
+		return nil, err
+	}
+	c.Logger.Printf("send get request to %s\n", c.URL.String())
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	var users []*User
+	if err := c.decodeBody(resp, &users); err != nil {
+		return nil, err
+	}
+
+	paginationInfo, err := c.extractPaginationInfo(resp, page, perPage)
+	if err != nil {
+		return nil, err
+	}
+
+	return constructUsersResponse(users, paginationInfo), nil
+}
+
 func (c *Client) GetFollowees(ctx context.Context, userID string, page int, perPage int) (*UsersResponse, error) {
 	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
 		return nil, err
@@ -110,7 +120,17 @@ func (c *Client) GetFollowees(ctx context.Context, userID string, page int, perP
 		return nil, err
 	}
 
-	return c.extractUsersResponse(resp, page, perPage)
+	var users []*User
+	if err := c.decodeBody(resp, &users); err != nil {
+		return nil, err
+	}
+
+	paginationInfo, err := c.extractPaginationInfo(resp, page, perPage)
+	if err != nil {
+		return nil, err
+	}
+
+	return constructUsersResponse(users, paginationInfo), nil
 }
 
 func (c *Client) GetFollowers(ctx context.Context, userID string, page int, perPage int) (*UsersResponse, error) {
@@ -133,7 +153,17 @@ func (c *Client) GetFollowers(ctx context.Context, userID string, page int, perP
 		return nil, err
 	}
 
-	return c.extractUsersResponse(resp, page, perPage)
+	var users []*User
+	if err := c.decodeBody(resp, &users); err != nil {
+		return nil, err
+	}
+
+	paginationInfo, err := c.extractPaginationInfo(resp, page, perPage)
+	if err != nil {
+		return nil, err
+	}
+
+	return constructUsersResponse(users, paginationInfo), nil
 }
 
 func (c *Client) GetItem(ctx context.Context, itemID string) (*Item, error) {

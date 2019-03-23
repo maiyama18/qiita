@@ -86,6 +86,34 @@ func (c *Client) extractUsersResponse(resp *http.Response, page int, perPage int
 	return usersResp, nil
 }
 
+func (c *Client) extractPaginationInfo(resp *http.Response, page int, perPage int) (*PaginationInfo, error) {
+	links, err := c.parseHeaderLink(resp)
+	if err != nil {
+		return nil, err
+	}
+	lastURL := links["last"]
+	lastPage, err := strconv.Atoi(lastURL.Query().Get("page"))
+	if err != nil {
+		return nil, err
+	}
+	if lastPage > 100 {
+		lastPage = 100
+	}
+
+	totalCount, err := strconv.Atoi(resp.Header.Get("total-count"))
+	if err != nil {
+		return nil, err
+	}
+
+	return &PaginationInfo{
+		Page:       page,
+		PerPage:    perPage,
+		FirstPage:  1,
+		LastPage:   lastPage,
+		TotalCount: totalCount,
+	}, nil
+}
+
 func (c *Client) newRequest(ctx context.Context, method string, relativePath string, query map[string]string, body io.Reader) (*http.Request, error) {
 	url := *c.URL
 	url.Path = path.Join(url.Path, relativePath)
