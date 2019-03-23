@@ -31,7 +31,7 @@ func TestNew(t *testing.T) {
 			accessToken: "access_token",
 			logger:      log.New(os.Stdout, "", log.LstdFlags),
 
-			expectedURL:    BASE_URL,
+			expectedURL:    BaseURL,
 			expectedLogger: log.New(os.Stdout, "", log.LstdFlags),
 		},
 		{
@@ -39,7 +39,7 @@ func TestNew(t *testing.T) {
 			accessToken: "access_token",
 			logger:      nil,
 
-			expectedURL:    BASE_URL,
+			expectedURL:    BaseURL,
 			expectedLogger: log.New(ioutil.Discard, "", 0),
 		},
 		{
@@ -47,7 +47,7 @@ func TestNew(t *testing.T) {
 			accessToken: "",
 			logger:      log.New(os.Stdout, "", log.LstdFlags),
 
-			expectedURL:    BASE_URL,
+			expectedURL:    BaseURL,
 			expectedLogger: log.New(os.Stdout, "", log.LstdFlags),
 		},
 	}

@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-const BASE_URL = "https://qiita.com/api/v2"
+const BaseURL = "https://qiita.com/api/v2"
 
 type Client struct {
 	URL         *url.URL
@@ -21,7 +21,7 @@ type Client struct {
 }
 
 func New(accessToken string, logger *log.Logger) (*Client, error) {
-	baseURL, err := url.Parse(BASE_URL)
+	baseURL, err := url.Parse(BaseURL)
 	if err != nil {
 		return nil, err
 	}
