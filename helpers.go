@@ -78,7 +78,7 @@ func (c *Client) validatePaginationLimit(page, pageMin, pageMax, perPage, perPag
 	return nil
 }
 
-func (c *Client) extractPaginationInfo(resp *http.Response, page int, perPage int) (*PaginationInfo, error) {
+func (c *Client) extractPaginationInfo(resp *http.Response, page int, perPage int) (*paginationInfo, error) {
 	links, err := c.parseHeaderLink(resp)
 	if err != nil {
 		return nil, err
@@ -97,7 +97,7 @@ func (c *Client) extractPaginationInfo(resp *http.Response, page int, perPage in
 		return nil, err
 	}
 
-	return &PaginationInfo{
+	return &paginationInfo{
 		Page:       page,
 		PerPage:    perPage,
 		FirstPage:  1,

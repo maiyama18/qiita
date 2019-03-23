@@ -8,6 +8,7 @@ import (
 	"strconv"
 )
 
+// User represents a qiita user
 type User struct {
 	ID           string `json:"id"`
 	PermanentID  int    `json:"permanent_id"`
@@ -28,6 +29,7 @@ type User struct {
 	TwitterID  string `json:"twitter_screen_name"`
 }
 
+// UsersResponse represents a response of qiita API which returns multiple users
 type UsersResponse struct {
 	Users      []*User
 	PerPage    int
@@ -37,7 +39,7 @@ type UsersResponse struct {
 	TotalCount int
 }
 
-type PaginationInfo struct {
+type paginationInfo struct {
 	PerPage    int
 	Page       int
 	FirstPage  int
@@ -45,6 +47,10 @@ type PaginationInfo struct {
 	TotalCount int
 }
 
+// GetUser fetches a user having provided userID
+//
+// GET /api/v2/users/:user_id
+// document: https://qiita.com/api/v2/docs#get-apiv2usersuser_id
 func (c *Client) GetUser(ctx context.Context, userID string) (*User, error) {
 	req, err := c.newRequest(ctx, "GET", path.Join("users", userID), nil, nil)
 	if err != nil {
@@ -73,6 +79,11 @@ func (c *Client) GetUser(ctx context.Context, userID string) (*User, error) {
 	return &user, nil
 }
 
+// GetUsers fetches all the users
+// The number of users included in one response and the page number should be provided
+//
+// GET /api/v2/users
+// document: https://qiita.com/api/v2/docs#get-apiv2users
 func (c *Client) GetUsers(ctx context.Context, page int, perPage int) (*UsersResponse, error) {
 	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
 		return nil, err
@@ -106,6 +117,11 @@ func (c *Client) GetUsers(ctx context.Context, page int, perPage int) (*UsersRes
 	return constructUsersResponse(users, paginationInfo), nil
 }
 
+// GetFollowees fetches all the followees of the user having provided userID
+// The number of users included in one response and the page number should be provided
+//
+// GET /api/v2/users/:user_id/followees
+// document: http://qiita.com/api/v2/docs#get-apiv2usersuser_idfollowees
 func (c *Client) GetFollowees(ctx context.Context, userID string, page int, perPage int) (*UsersResponse, error) {
 	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
 		return nil, err
@@ -139,6 +155,11 @@ func (c *Client) GetFollowees(ctx context.Context, userID string, page int, perP
 	return constructUsersResponse(users, paginationInfo), nil
 }
 
+// GetFollowers fetches all the followers of the user having provided userID
+// The number of users included in one response and the page number should be provided
+//
+// GET /api/v2/users/:user_id/followers
+// document: https://qiita.com/api/v2/docs#get-apiv2usersuser_idfollowers
 func (c *Client) GetFollowers(ctx context.Context, userID string, page int, perPage int) (*UsersResponse, error) {
 	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
 		return nil, err
@@ -172,6 +193,11 @@ func (c *Client) GetFollowers(ctx context.Context, userID string, page int, perP
 	return constructUsersResponse(users, paginationInfo), nil
 }
 
+// IsFollowingUser returns true if the authenticated user is following the user having provided userID
+// This method requires authentication
+//
+// GET /api/v2/users/:user_id/following
+// document: https://qiita.com/api/v2/docs#get-apiv2usersuser_idfollowing
 func (c *Client) IsFollowingUser(ctx context.Context, userID string) (bool, error) {
 	req, err := c.newRequest(ctx, "GET", path.Join("users", userID, "following"), nil, nil)
 	if err != nil {
@@ -195,7 +221,7 @@ func (c *Client) IsFollowingUser(ctx context.Context, userID string) (bool, erro
 	}
 }
 
-func constructUsersResponse(users []*User, info *PaginationInfo) *UsersResponse {
+func constructUsersResponse(users []*User, info *paginationInfo) *UsersResponse {
 	return &UsersResponse{
 		Users:      users,
 		PerPage:    info.PerPage,

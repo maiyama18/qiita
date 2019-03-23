@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// Item represents an article published on qiita
 type Item struct {
 	ID           string `json:"id"`
 	Title        string `json:"title"`
@@ -28,11 +29,16 @@ type Item struct {
 	Tags []*Tag `json:"tags"`
 }
 
+// Tag represents a tag for a qiita item
 type Tag struct {
 	Name     string   `json:"name"`
 	Versions []string `json:"versions"`
 }
 
+// GetItem fetches an item having provided itemID
+//
+// GET /api/v2/items/:item_id
+// document: https://qiita.com/api/v2/docs#get-apiv2itemsitem_id
 func (c *Client) GetItem(ctx context.Context, itemID string) (*Item, error) {
 	req, err := c.newRequest(ctx, "GET", path.Join("items", itemID), nil, nil)
 	if err != nil {

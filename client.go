@@ -9,6 +9,7 @@ import (
 
 const BaseURL = "https://qiita.com/api/v2"
 
+// Client interacts with qiita API
 type Client struct {
 	URL         *url.URL
 	HTTPClient  *http.Client
@@ -16,6 +17,7 @@ type Client struct {
 	Logger      *log.Logger
 }
 
+// New returns a Client
 func New(accessToken string, logger *log.Logger) (*Client, error) {
 	baseURL, err := url.Parse(BaseURL)
 	if err != nil {

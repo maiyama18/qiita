@@ -1,20 +1,13 @@
 package main
 
 import (
-	"bufio"
 	"context"
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
-	"net/http"
-	"net/http/httptest"
 	"net/url"
-	"os"
-	"strconv"
 	"strings"
 	"testing"
-	"time"
 )
 
 func TestClient_GetFollowees(t *testing.T) {
