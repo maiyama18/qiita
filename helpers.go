@@ -1,9 +1,9 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/net/context"
 	"io"
 	"net/http"
 	"net/url"
@@ -13,8 +13,36 @@ import (
 	"strings"
 )
 
+func (c *Client) newRequest(ctx context.Context, method string, relativePath string, query map[string]string, body io.Reader) (*http.Request, error) {
+	reqUrl := *c.URL
+	reqUrl.Path = path.Join(reqUrl.Path, relativePath)
+
+	if query != nil {
+		q := reqUrl.Query()
+		for k, v := range query {
+			q.Add(k, v)
+		}
+		reqUrl.RawQuery = q.Encode()
+	}
+
+	req, err := http.NewRequest(method, reqUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req = req.WithContext(ctx)
+	req.Header.Set("User-Agent", "qiita go-client (github.com/muiscript/qiita)")
+	if c.AccessToken != "" {
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+	}
+
+	return req, nil
+}
+
 func (c *Client) decodeBody(resp *http.Response, out interface{}) error {
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 	decoder := json.NewDecoder(resp.Body)
 	return decoder.Decode(out)
 }
@@ -29,12 +57,12 @@ func (c *Client) parseHeaderLink(resp *http.Response) (map[string]*url.URL, erro
 		m := rx.FindStringSubmatch(link)
 
 		rel := m[2]
-		url, err := url.Parse(m[1])
+		linkURL, err := url.Parse(m[1])
 		if err != nil {
 			return nil, err
 		}
 
-		links[rel] = url
+		links[rel] = linkURL
 	}
 
 	return links, nil
@@ -48,42 +76,6 @@ func (c *Client) validatePaginationLimit(page, pageMin, pageMax, perPage, perPag
 		return fmt.Errorf("perPage parameter should be between 1 and 100. got %d", perPage)
 	}
 	return nil
-}
-
-func (c *Client) extractUsersResponse(resp *http.Response, page int, perPage int) (*UsersResponse, error) {
-	var users []*User
-	if err := c.decodeBody(resp, &users); err != nil {
-		return nil, err
-	}
-
-	links, err := c.parseHeaderLink(resp)
-	if err != nil {
-		return nil, err
-	}
-	lastURL := links["last"]
-	lastPage, err := strconv.Atoi(lastURL.Query().Get("page"))
-	if err != nil {
-		return nil, err
-	}
-	if lastPage > 100 {
-		lastPage = 100
-	}
-
-	totalCount, err := strconv.Atoi(resp.Header.Get("total-count"))
-	if err != nil {
-		return nil, err
-	}
-
-	usersResp := &UsersResponse{
-		Page:       page,
-		PerPage:    perPage,
-		FirstPage:  1,
-		LastPage:   lastPage,
-		TotalCount: totalCount,
-		Users:      users,
-	}
-
-	return usersResp, nil
 }
 
 func (c *Client) extractPaginationInfo(resp *http.Response, page int, perPage int) (*PaginationInfo, error) {
@@ -112,30 +104,4 @@ func (c *Client) extractPaginationInfo(resp *http.Response, page int, perPage in
 		LastPage:   lastPage,
 		TotalCount: totalCount,
 	}, nil
-}
-
-func (c *Client) newRequest(ctx context.Context, method string, relativePath string, query map[string]string, body io.Reader) (*http.Request, error) {
-	url := *c.URL
-	url.Path = path.Join(url.Path, relativePath)
-
-	if query != nil {
-		q := url.Query()
-		for k, v := range query {
-			q.Add(k, v)
-		}
-		url.RawQuery = q.Encode()
-	}
-
-	req, err := http.NewRequest(method, url.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req = req.WithContext(ctx)
-	req.Header.Set("User-Agent", "qiita go-client (github.com/muiscript/qiita)")
-	if c.AccessToken != "" {
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
-	}
-
-	return req, nil
 }
