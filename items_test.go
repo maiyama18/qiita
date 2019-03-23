@@ -2,11 +2,13 @@ package qiita
 
 import (
 	"context"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+	"path"
 	"strings"
 	"testing"
 	"time"
@@ -14,11 +16,14 @@ import (
 
 func TestClient_GetItem(t *testing.T) {
 	location, _ := time.LoadLocation("Asia/Tokyo")
+	mockFilesBaseDir := path.Join("testdata", "responses", "items", "GetItem")
 
 	tests := []struct {
-		desc         string
-		id           string
-		responseFile string
+		desc        string
+		inputItemID string
+
+		mockResponseHeaderFile string
+		mockResponseBodyFile   string
 
 		expectedMethod          string
 		expectedRequestPath     string
@@ -37,9 +42,11 @@ func TestClient_GetItem(t *testing.T) {
 		expectedTagNames        []string
 	}{
 		{
-			desc:         "success",
-			id:           "b4ca1773580317e7112e",
-			responseFile: "items_b4ca1773580317e7112e",
+			desc:        "success",
+			inputItemID: "b4ca1773580317e7112e",
+
+			mockResponseHeaderFile: "success-header",
+			mockResponseBodyFile:   "success-body",
 
 			expectedMethod:          http.MethodGet,
 			expectedRequestPath:     "/items/b4ca1773580317e7112e",
@@ -56,9 +63,11 @@ func TestClient_GetItem(t *testing.T) {
 			expectedUserPermanentID: 159260,
 		},
 		{
-			desc:         "failure_nonexistent_item",
-			id:           "nonexistent",
-			responseFile: "items_nonexistent",
+			desc:        "failure_nonexistent_item",
+			inputItemID: "nonexistent",
+
+			mockResponseHeaderFile: "nonexistent-header",
+			mockResponseBodyFile:   "nonexistent-body",
 
 			expectedMethod:      http.MethodGet,
 			expectedRequestPath: "/items/nonexistent",
@@ -68,7 +77,7 @@ func TestClient_GetItem(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			server := newTestServer(t, tt.responseFile, tt.expectedMethod, tt.expectedRequestPath, "")
+			server := newTestServer(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, "")
 			defer server.Close()
 
 			serverURL, err := url.Parse(server.URL)
@@ -81,7 +90,7 @@ func TestClient_GetItem(t *testing.T) {
 				Logger:     log.New(ioutil.Discard, "", 0),
 			}
 
-			item, err := cli.GetItem(context.Background(), tt.id)
+			item, err := cli.GetItem(context.Background(), tt.inputItemID)
 			if tt.expectedErrString == "" {
 				if !assert.Nil(t, err) {
 					t.FailNow()
@@ -98,15 +107,13 @@ func TestClient_GetItem(t *testing.T) {
 				assert.Equal(t, tt.expectedLikesCount, item.LikesCount)
 				assert.Equal(t, tt.expectedUserID, item.User.ID)
 				assert.Equal(t, tt.expectedUserPermanentID, item.User.PermanentID)
-
 			} else {
 				if !assert.NotNil(t, err) {
 					t.FailNow()
 				}
 
-				assert.True(t, strings.Contains(err.Error(), tt.expectedErrString))
+				assert.True(t, strings.Contains(err.Error(), tt.expectedErrString), fmt.Sprintf("'%s' should contain '%s'", err.Error(), tt.expectedErrString))
 			}
-
 		})
 	}
 }
