@@ -407,8 +407,25 @@ func (c *Client) UnfollowUser(ctx context.Context, userID string) error {
 // GET /api/v2/authenticated_user
 // document: http://qiita.com/api/v2/docs#get-apiv2authenticated_user
 func (c *Client) GetAuthenticatedUser(ctx context.Context) (*User, error) {
-	// TODO: implement
-	return nil, nil
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("authenticated_user"), nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var user User
+	code, _, err := c.doRequest(req, &user)
+	if err != nil {
+		return nil, err
+	}
+
+	switch code {
+	case http.StatusOK:
+		return &user, nil
+	case http.StatusUnauthorized:
+		return nil, fmt.Errorf("unauthorized. you may have provided no/invalid access token (status = %d)", code)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 // GetAuthenticatedUserItems fetches the item created by the authenticated user.

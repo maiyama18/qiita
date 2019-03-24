@@ -918,3 +918,77 @@ func TestClient_UnfollowUser(t *testing.T) {
 		})
 	}
 }
+
+func TestClient_GetAuthenticatedUser(t *testing.T) {
+	mockFilesBaseDir := path.Join("testdata", "responses", "users", "GetAuthenticatedUser")
+
+	tests := []struct {
+		desc string
+
+		mockResponseHeaderFile string
+		mockResponseBodyFile   string
+
+		expectedMethod         string
+		expectedRequestPath    string
+		expectedRawQuery       string
+		expectedErrString      string
+		expectedID             string
+		expectedPermanentID    int
+		expectedGithubID       string
+		expectedPostsCount     int
+		expectedFollowersCount int
+	}{
+		{
+			desc: "success",
+
+			mockResponseHeaderFile: "success-header",
+			mockResponseBodyFile:   "success-body",
+
+			expectedMethod:         http.MethodGet,
+			expectedRequestPath:    "/authenticated_user",
+			expectedID:             "muiscript",
+			expectedPermanentID:    159260,
+			expectedGithubID:       "muiscript",
+			expectedPostsCount:     14,
+			expectedFollowersCount: 12,
+		},
+		{
+			desc: "failure-no_token",
+
+			mockResponseHeaderFile: "no_token-header",
+			mockResponseBodyFile:   "no_token-body",
+
+			expectedMethod:      http.MethodGet,
+			expectedRequestPath: "/authenticated_user",
+			expectedErrString:   "unauthorized",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			cli, teardown := setup(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, tt.expectedRawQuery)
+			defer teardown()
+
+			user, err := cli.GetAuthenticatedUser(context.Background())
+			if tt.expectedErrString == "" {
+				if !assert.Nil(t, err) {
+					t.FailNow()
+				}
+
+				assert.Equal(t, tt.expectedID, user.ID)
+				assert.Equal(t, tt.expectedPermanentID, user.PermanentID)
+				assert.Equal(t, tt.expectedGithubID, user.GithubID)
+				assert.Equal(t, tt.expectedGithubID, user.GithubID)
+				assert.Equal(t, tt.expectedPostsCount, user.PostsCount)
+				assert.Equal(t, tt.expectedFollowersCount, user.FollowersCount)
+			} else {
+				if !assert.NotNil(t, err) {
+					t.FailNow()
+				}
+
+				assert.True(t, strings.Contains(err.Error(), tt.expectedErrString), fmt.Sprintf("'%s' should contain '%s'", err.Error(), tt.expectedErrString))
+			}
+
+		})
+	}
+}

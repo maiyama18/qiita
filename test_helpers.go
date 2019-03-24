@@ -37,6 +37,8 @@ func setup(t *testing.T, mockFilesBaseDir, mockResponseHeaderFile, mockResponseB
 
 func newTestServer(t *testing.T, mockFilesBaseDir, mockResponseHeaderFile, mockResponseBodyFile, expectedMethod, expectedRequestPath, expectedRawQuery string) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		t.Helper()
+
 		if !assert.Equal(t, expectedMethod, req.Method) {
 			t.FailNow()
 		}
