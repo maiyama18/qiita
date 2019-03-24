@@ -58,7 +58,7 @@ type ItemDraft struct {
 // GET /api/v2/items/:item_id
 // document: https://qiita.com/api/v2/docs#get-apiv2itemsitem_id
 func (c *Client) GetItem(ctx context.Context, itemID string) (*Item, error) {
-	req, err := c.newRequest(ctx, "GET", path.Join("items", itemID), nil, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("items", itemID), nil, nil)
 	if err != nil {
 		return nil, err
 	}
