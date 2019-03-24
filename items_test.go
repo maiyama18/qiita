@@ -285,3 +285,65 @@ func TestClient_GetItemStockers(t *testing.T) {
 		})
 	}
 }
+
+func TestClient_GetItemComments(t *testing.T) {
+	mockFilesBaseDir := path.Join("testdata", "responses", "items", "GetItemComments")
+
+	tests := []struct {
+		desc        string
+		inputItemID string
+
+		mockResponseHeaderFile string
+		mockResponseBodyFile   string
+
+		expectedMethod      string
+		expectedRequestPath string
+		expectedRawQuery    string
+		expectedErrString   string
+		expectedCommentsLen int
+	}{
+		{
+			desc:        "success",
+			inputItemID: "b4ca1773580317e7112e",
+
+			mockResponseHeaderFile: "success-header",
+			mockResponseBodyFile:   "success-body",
+
+			expectedMethod:      http.MethodGet,
+			expectedRequestPath: "/items/b4ca1773580317e7112e/comments",
+			expectedCommentsLen: 4,
+		},
+		{
+			desc:        "failure-not_found",
+			inputItemID: "nonexistent",
+
+			mockResponseHeaderFile: "not_exist-header",
+			mockResponseBodyFile:   "not_exist-body",
+
+			expectedMethod:      http.MethodGet,
+			expectedRequestPath: "/items/nonexistent/comments",
+			expectedErrString:   "not found",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			cli, teardown := setup(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, tt.expectedRawQuery)
+			defer teardown()
+
+			comments, err := cli.GetItemComments(context.Background(), tt.inputItemID)
+			if tt.expectedErrString == "" {
+				if !assert.Nil(t, err) {
+					t.FailNow()
+				}
+
+				assert.Equal(t, tt.expectedCommentsLen, len(comments))
+			} else {
+				if !assert.NotNil(t, err) {
+					t.FailNow()
+				}
+
+				assert.True(t, strings.Contains(err.Error(), tt.expectedErrString), fmt.Sprintf("'%s' should contain '%s'", err.Error(), tt.expectedErrString))
+			}
+		})
+	}
+}

@@ -133,8 +133,25 @@ func (c *Client) GetItems(ctx context.Context, page, perPage int) (*ItemsRespons
 // GET /api/v2/items/:item_id/comments
 // document: http://qiita.com/api/v2/docs#get-apiv2itemsitem_idcomments
 func (c *Client) GetItemComments(ctx context.Context, itemID string) ([]*Comment, error) {
-	// TODO: implement
-	return nil, nil
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("items", itemID, "comments"), nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var comments []*Comment
+	code, _, err := c.doRequest(req, &comments)
+	if err != nil {
+		return nil, err
+	}
+
+	switch code {
+	case http.StatusOK:
+		return comments, nil
+	case http.StatusNotFound:
+		return nil, fmt.Errorf("item with id '%s' not found (status = %d)", itemID, code)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 // GetItemStockers fetches the users who stocked the item having provided itemID.
@@ -171,7 +188,7 @@ func (c *Client) GetItemStockers(ctx context.Context, itemID string, page, perPa
 	}
 }
 
-// CreateItem posts the item.
+// CreateItem publishes the item.
 // This method requires authentication.
 //
 // POST /api/v2/items
