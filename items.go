@@ -1,7 +1,9 @@
 package qiita
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"path"
@@ -26,8 +28,8 @@ type Item struct {
 	LikesCount     int `json:"likes_count"`
 	ReactionsCount int `json:"reactions_count"`
 
-	User *User      `json:"user"`
-	Tags []*ItemTag `json:"tags"`
+	User     *User      `json:"user"`
+	ItemTags []*ItemTag `json:"tags"`
 }
 
 // ItemTag represents a tag for a qiita item.
@@ -64,10 +66,11 @@ func newItemsResponse(items []*Item, header http.Header, page, perPage int) (*It
 
 // ItemDraft represents an item to be posted for qiita.
 type ItemDraft struct {
-	Title   string `json:"title"`
-	Body    string `json:"body"`
-	Private bool   `json:"private"`
-	Tweet   bool   `json:"tweet"`
+	Title    string     `json:"title"`
+	Body     string     `json:"body"`
+	ItemTags []*ItemTag `json:"tags"`
+	Private  bool       `json:"private"`
+	Tweet    bool       `json:"tweet"`
 }
 
 // GetItem fetches the item having provided itemID.
@@ -193,8 +196,19 @@ func (c *Client) GetItemStockers(ctx context.Context, itemID string, page, perPa
 //
 // POST /api/v2/items
 // document: http://qiita.com/api/v2/docs#post-apiv2items
-func (c *Client) CreateItem(ctx context.Context, title, body string, private, tweet bool) (*Item, error) {
-	// TODO: implement
+func (c *Client) CreateItem(ctx context.Context, title, body string, itemTags []*ItemTag, private, tweet bool) (*Item, error) {
+	itemDraft := &ItemDraft{Title: title, Body: body, ItemTags: itemTags, Private: private, Tweet: tweet}
+	bodyBytes, err := json.Marshal(itemDraft)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := c.newRequest(ctx, http.MethodPost, "items", nil, bytes.NewBuffer(bodyBytes))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
 	return nil, nil
 }
 
