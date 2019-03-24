@@ -68,16 +68,15 @@ func (c *Client) GetItem(ctx context.Context, itemID string) (*Item, error) {
 	if err != nil {
 		return nil, err
 	}
-	if code < 200 || 300 <= code {
-		switch code {
-		case http.StatusNotFound:
-			return nil, fmt.Errorf("item with id '%s' not found (status = %d)", itemID, code)
-		default:
-			return nil, fmt.Errorf("unknown error (status = %d)", code)
-		}
-	}
 
-	return &item, nil
+	switch code {
+	case http.StatusOK:
+		return &item, nil
+	case http.StatusNotFound:
+		return nil, fmt.Errorf("item with id '%s' not found (status = %d)", itemID, code)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 // GetItems fetches all the items posted on qiita.

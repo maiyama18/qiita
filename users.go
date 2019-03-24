@@ -99,19 +99,18 @@ func (c *Client) GetUsers(ctx context.Context, page, perPage int) (*UsersRespons
 	if err != nil {
 		return nil, err
 	}
-	if code < 200 || 300 <= code {
-		switch code {
-		default:
-			return nil, fmt.Errorf("unknown error (status = %d)", code)
+
+	switch code {
+	case http.StatusOK:
+		paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
+		if err != nil {
+			return nil, err
 		}
+		return constructUsersResponse(users, paginationInfo), nil
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
 	}
 
-	paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
-	if err != nil {
-		return nil, err
-	}
-
-	return constructUsersResponse(users, paginationInfo), nil
 }
 
 // GetUserFollowees fetches all the followees of the user having provided userID.
@@ -138,21 +137,19 @@ func (c *Client) GetUserFollowees(ctx context.Context, userID string, page, perP
 	if err != nil {
 		return nil, err
 	}
-	if code < 200 || 300 <= code {
-		switch code {
-		case http.StatusNotFound:
-			return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
-		default:
-			return nil, fmt.Errorf("unknown error (status = %d)", code)
+
+	switch code {
+	case http.StatusOK:
+		paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
+		if err != nil {
+			return nil, err
 		}
+		return constructUsersResponse(users, paginationInfo), nil
+	case http.StatusNotFound:
+		return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
 	}
-
-	paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
-	if err != nil {
-		return nil, err
-	}
-
-	return constructUsersResponse(users, paginationInfo), nil
 }
 
 // GetUserFollowers fetches all the followers of the user having provided userID.
@@ -179,21 +176,19 @@ func (c *Client) GetUserFollowers(ctx context.Context, userID string, page, perP
 	if err != nil {
 		return nil, err
 	}
-	if code < 200 || 300 <= code {
-		switch code {
-		case http.StatusNotFound:
-			return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
-		default:
-			return nil, fmt.Errorf("unknown error (status = %d)", code)
+
+	switch code {
+	case http.StatusOK:
+		paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
+		if err != nil {
+			return nil, err
 		}
+		return constructUsersResponse(users, paginationInfo), nil
+	case http.StatusNotFound:
+		return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
 	}
-
-	paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
-	if err != nil {
-		return nil, err
-	}
-
-	return constructUsersResponse(users, paginationInfo), nil
 }
 
 // GetUserItems fetches the items created by the user having provided userID.
@@ -219,21 +214,19 @@ func (c *Client) GetUserItems(ctx context.Context, userID string, page, perPage 
 	if err != nil {
 		return nil, err
 	}
-	if code < 200 || 300 <= code {
-		switch code {
-		case http.StatusNotFound:
-			return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
-		default:
-			return nil, fmt.Errorf("unknown error (status = %d)", code)
+
+	switch code {
+	case http.StatusOK:
+		paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
+		if err != nil {
+			return nil, err
 		}
+		return constructItemsResponse(items, paginationInfo), nil
+	case http.StatusNotFound:
+		return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
 	}
-
-	paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
-	if err != nil {
-		return nil, err
-	}
-
-	return constructItemsResponse(items, paginationInfo), nil
 }
 
 // GetUserStocks fetches the items stocked by the user having provided userID.
@@ -259,21 +252,19 @@ func (c *Client) GetUserStocks(ctx context.Context, userID string, page, perPage
 	if err != nil {
 		return nil, err
 	}
-	if code < 200 || 300 <= code {
-		switch code {
-		case http.StatusNotFound:
-			return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
-		default:
-			return nil, fmt.Errorf("unknown error (status = %d)", code)
+
+	switch code {
+	case http.StatusOK:
+		paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
+		if err != nil {
+			return nil, err
 		}
+		return constructItemsResponse(items, paginationInfo), nil
+	case http.StatusNotFound:
+		return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
 	}
-
-	paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
-	if err != nil {
-		return nil, err
-	}
-
-	return constructItemsResponse(items, paginationInfo), nil
 }
 
 // GetUserFollowingTags fetches the tags followed by the user having provided userID.
@@ -299,21 +290,19 @@ func (c *Client) GetUserFollowingTags(ctx context.Context, userID string, page, 
 	if err != nil {
 		return nil, err
 	}
-	if code < 200 || 300 <= code {
-		switch code {
-		case http.StatusNotFound:
-			return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
-		default:
-			return nil, fmt.Errorf("unknown error (status = %d)", code)
+
+	switch code {
+	case http.StatusOK:
+		paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
+		if err != nil {
+			return nil, err
 		}
+		return constructTagsResponse(tags, paginationInfo), nil
+	case http.StatusNotFound:
+		return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
 	}
-
-	paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
-	if err != nil {
-		return nil, err
-	}
-
-	return constructTagsResponse(tags, paginationInfo), nil
 }
 
 // IsFollowingUser returns true if the authenticated user is following the user having provided userID.
