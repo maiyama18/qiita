@@ -2,6 +2,7 @@ package qiita
 
 import (
 	"context"
+	"net/http"
 )
 
 // Tag represents tag which can be attached to a qiita item.
@@ -20,6 +21,22 @@ type TagsResponse struct {
 	FirstPage  int
 	LastPage   int
 	TotalCount int
+}
+
+func newTagsResponse(tags []*Tag, header http.Header, page, perPage int) (*TagsResponse, error) {
+	paginationInfo, err := extractPaginationInfo(header, page, perPage)
+	if err != nil {
+		return nil, err
+	}
+
+	return &TagsResponse{
+		Tags:       tags,
+		PerPage:    paginationInfo.PerPage,
+		Page:       paginationInfo.Page,
+		FirstPage:  paginationInfo.FirstPage,
+		LastPage:   paginationInfo.LastPage,
+		TotalCount: paginationInfo.TotalCount,
+	}, nil
 }
 
 // GetTag fetches the tag having provided tagID.
@@ -77,15 +94,4 @@ func (c *Client) FollowTag(ctx context.Context, tagID string) error {
 func (c *Client) UnfollowTag(ctx context.Context, tagID string) error {
 	// TODO: implement
 	return nil
-}
-
-func constructTagsResponse(tags []*Tag, info *paginationInfo) *TagsResponse {
-	return &TagsResponse{
-		Tags:       tags,
-		PerPage:    info.PerPage,
-		Page:       info.Page,
-		FirstPage:  info.FirstPage,
-		LastPage:   info.LastPage,
-		TotalCount: info.TotalCount,
-	}
 }

@@ -77,8 +77,8 @@ func (c *Client) validatePaginationLimit(page, perPage int) error {
 	return nil
 }
 
-func (c *Client) extractPaginationInfo(header http.Header, page int, perPage int) (*paginationInfo, error) {
-	links, err := c.parseHeaderLink(header)
+func extractPaginationInfo(header http.Header, page int, perPage int) (*paginationInfo, error) {
+	links, err := parseHeaderLink(header)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (c *Client) extractPaginationInfo(header http.Header, page int, perPage int
 	}, nil
 }
 
-func (c *Client) parseHeaderLink(header http.Header) (map[string]*url.URL, error) {
+func parseHeaderLink(header http.Header) (map[string]*url.URL, error) {
 	links := make(map[string]*url.URL)
 
 	linksStr := header.Get("link")

@@ -39,6 +39,22 @@ type UsersResponse struct {
 	TotalCount int
 }
 
+func newUsersResponse(users []*User, header http.Header, page, perPage int) (*UsersResponse, error) {
+	paginationInfo, err := extractPaginationInfo(header, page, perPage)
+	if err != nil {
+		return nil, err
+	}
+
+	return &UsersResponse{
+		Users:      users,
+		PerPage:    paginationInfo.PerPage,
+		Page:       paginationInfo.Page,
+		FirstPage:  paginationInfo.FirstPage,
+		LastPage:   paginationInfo.LastPage,
+		TotalCount: paginationInfo.TotalCount,
+	}, nil
+}
+
 type paginationInfo struct {
 	PerPage    int
 	Page       int
@@ -56,23 +72,21 @@ func (c *Client) GetUser(ctx context.Context, userID string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.Logger.Printf("send get request to %s\n", c.URL.String())
 
 	var user User
 	code, _, err := c.doRequest(req, &user)
 	if err != nil {
 		return nil, err
 	}
-	if code < 200 || 300 <= code {
-		switch code {
-		case http.StatusNotFound:
-			return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
-		default:
-			return nil, fmt.Errorf("unknown error (status = %d)", code)
-		}
-	}
 
-	return &user, nil
+	switch code {
+	case http.StatusOK:
+		return &user, nil
+	case http.StatusNotFound:
+		return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 // GetUsers fetches all the users.
@@ -102,11 +116,7 @@ func (c *Client) GetUsers(ctx context.Context, page, perPage int) (*UsersRespons
 
 	switch code {
 	case http.StatusOK:
-		paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
-		if err != nil {
-			return nil, err
-		}
-		return constructUsersResponse(users, paginationInfo), nil
+		return newUsersResponse(users, header, page, perPage)
 	default:
 		return nil, fmt.Errorf("unknown error (status = %d)", code)
 	}
@@ -140,11 +150,7 @@ func (c *Client) GetUserFollowees(ctx context.Context, userID string, page, perP
 
 	switch code {
 	case http.StatusOK:
-		paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
-		if err != nil {
-			return nil, err
-		}
-		return constructUsersResponse(users, paginationInfo), nil
+		return newUsersResponse(users, header, page, perPage)
 	case http.StatusNotFound:
 		return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
 	default:
@@ -179,11 +185,7 @@ func (c *Client) GetUserFollowers(ctx context.Context, userID string, page, perP
 
 	switch code {
 	case http.StatusOK:
-		paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
-		if err != nil {
-			return nil, err
-		}
-		return constructUsersResponse(users, paginationInfo), nil
+		return newUsersResponse(users, header, page, perPage)
 	case http.StatusNotFound:
 		return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
 	default:
@@ -217,11 +219,7 @@ func (c *Client) GetUserItems(ctx context.Context, userID string, page, perPage 
 
 	switch code {
 	case http.StatusOK:
-		paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
-		if err != nil {
-			return nil, err
-		}
-		return constructItemsResponse(items, paginationInfo), nil
+		return newItemsResponse(items, header, page, perPage)
 	case http.StatusNotFound:
 		return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
 	default:
@@ -255,11 +253,7 @@ func (c *Client) GetUserStocks(ctx context.Context, userID string, page, perPage
 
 	switch code {
 	case http.StatusOK:
-		paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
-		if err != nil {
-			return nil, err
-		}
-		return constructItemsResponse(items, paginationInfo), nil
+		return newItemsResponse(items, header, page, perPage)
 	case http.StatusNotFound:
 		return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
 	default:
@@ -293,11 +287,7 @@ func (c *Client) GetUserFollowingTags(ctx context.Context, userID string, page, 
 
 	switch code {
 	case http.StatusOK:
-		paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
-		if err != nil {
-			return nil, err
-		}
-		return constructTagsResponse(tags, paginationInfo), nil
+		return newTagsResponse(tags, header, page, perPage)
 	case http.StatusNotFound:
 		return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
 	default:
@@ -444,25 +434,10 @@ func (c *Client) GetAuthenticatedUserItems(ctx context.Context, page, perPage in
 
 	switch code {
 	case http.StatusOK:
-		paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
-		if err != nil {
-			return nil, err
-		}
-		return constructItemsResponse(items, paginationInfo), nil
+		return newItemsResponse(items, header, page, perPage)
 	case http.StatusUnauthorized:
 		return nil, fmt.Errorf("unauthorized. you may have provided no/invalid access token (status = %d)", code)
 	default:
 		return nil, fmt.Errorf("unknown error (status = %d)", code)
-	}
-}
-
-func constructUsersResponse(users []*User, info *paginationInfo) *UsersResponse {
-	return &UsersResponse{
-		Users:      users,
-		PerPage:    info.PerPage,
-		Page:       info.Page,
-		FirstPage:  info.FirstPage,
-		LastPage:   info.LastPage,
-		TotalCount: info.TotalCount,
 	}
 }

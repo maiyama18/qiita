@@ -45,6 +45,22 @@ type ItemsResponse struct {
 	TotalCount int
 }
 
+func newItemsResponse(items []*Item, header http.Header, page, perPage int) (*ItemsResponse, error) {
+	paginationInfo, err := extractPaginationInfo(header, page, perPage)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ItemsResponse{
+		Items:      items,
+		PerPage:    paginationInfo.PerPage,
+		Page:       paginationInfo.Page,
+		FirstPage:  paginationInfo.FirstPage,
+		LastPage:   paginationInfo.LastPage,
+		TotalCount: paginationInfo.TotalCount,
+	}, nil
+}
+
 // ItemDraft represents an item to be posted for qiita.
 type ItemDraft struct {
 	Title   string `json:"title"`
@@ -173,15 +189,4 @@ func (c *Client) StockItem(ctx context.Context, itemID string) error {
 func (c *Client) UnstockItem(ctx context.Context, itemID string) error {
 	// TODO: implement
 	return nil
-}
-
-func constructItemsResponse(items []*Item, info *paginationInfo) *ItemsResponse {
-	return &ItemsResponse{
-		Items:      items,
-		PerPage:    info.PerPage,
-		Page:       info.Page,
-		FirstPage:  info.FirstPage,
-		LastPage:   info.LastPage,
-		TotalCount: info.TotalCount,
-	}
 }
