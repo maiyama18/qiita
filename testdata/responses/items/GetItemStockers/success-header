@@ -1,0 +1,22 @@
+HTTP/2 200 
+date: Sun, 24 Mar 2019 07:39:52 GMT
+content-type: application/json; charset=utf-8
+server: nginx
+x-frame-options: SAMEORIGIN
+x-xss-protection: 1; mode=block
+x-content-type-options: nosniff
+x-download-options: noopen
+x-permitted-cross-domain-policies: none
+referrer-policy: strict-origin-when-cross-origin
+link: <https://qiita.com/api/v2/items/b4ca1773580317e7112e/stockers?page=1&per_page=2>; rel="first", <https://qiita.com/api/v2/items/b4ca1773580317e7112e/stockers?page=2&per_page=2>; rel="prev", <https://qiita.com/api/v2/items/b4ca1773580317e7112e/stockers?page=4&per_page=2>; rel="next", <https://qiita.com/api/v2/items/b4ca1773580317e7112e/stockers?page=145&per_page=2>; rel="last"
+total-count: 289
+etag: W/"73e2e709e41a17b1cba3423e18362f66"
+cache-control: max-age=0, private, must-revalidate
+rate-limit: 60
+rate-remaining: 52
+rate-reset: 1553416334
+vary: Origin
+x-runtime: 0.127498
+strict-transport-security: max-age=2592000
+x-request-id: 5c7f3b73-5f29-4f46-939c-f4624405a353
+

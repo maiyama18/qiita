@@ -70,18 +70,18 @@ func TestClient_GetItems(t *testing.T) {
 			cli, teardown := setup(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, tt.expectedRawQuery)
 			defer teardown()
 
-			usersResp, err := cli.GetItems(context.Background(), tt.inputPage, tt.inputPerPage)
+			itemsResp, err := cli.GetItems(context.Background(), tt.inputPage, tt.inputPerPage)
 			if tt.expectedErrString == "" {
 				if !assert.Nil(t, err) {
 					t.FailNow()
 				}
 
-				assert.Equal(t, tt.expectedPage, usersResp.Page)
-				assert.Equal(t, tt.expectedPerPage, usersResp.PerPage)
-				assert.Equal(t, tt.expectedFirstPage, usersResp.FirstPage)
-				assert.Equal(t, tt.expectedLastPage, usersResp.LastPage)
-				assert.Equal(t, tt.expectedTotalCount, usersResp.TotalCount)
-				assert.Equal(t, tt.expectedItemsLen, len(usersResp.Items))
+				assert.Equal(t, tt.expectedPage, itemsResp.Page)
+				assert.Equal(t, tt.expectedPerPage, itemsResp.PerPage)
+				assert.Equal(t, tt.expectedFirstPage, itemsResp.FirstPage)
+				assert.Equal(t, tt.expectedLastPage, itemsResp.LastPage)
+				assert.Equal(t, tt.expectedTotalCount, itemsResp.TotalCount)
+				assert.Equal(t, tt.expectedItemsLen, len(itemsResp.Items))
 			} else {
 				if !assert.NotNil(t, err) {
 					t.FailNow()
@@ -176,6 +176,105 @@ func TestClient_GetItem(t *testing.T) {
 				assert.Equal(t, tt.expectedLikesCount, item.LikesCount)
 				assert.Equal(t, tt.expectedUserID, item.User.ID)
 				assert.Equal(t, tt.expectedUserPermanentID, item.User.PermanentID)
+			} else {
+				if !assert.NotNil(t, err) {
+					t.FailNow()
+				}
+
+				assert.True(t, strings.Contains(err.Error(), tt.expectedErrString), fmt.Sprintf("'%s' should contain '%s'", err.Error(), tt.expectedErrString))
+			}
+		})
+	}
+}
+
+func TestClient_GetItemStockers(t *testing.T) {
+	mockFilesBaseDir := path.Join("testdata", "responses", "items", "GetItemStockers")
+
+	tests := []struct {
+		desc         string
+		inputItemID  string
+		inputPage    int
+		inputPerPage int
+
+		mockResponseHeaderFile string
+		mockResponseBodyFile   string
+
+		expectedMethod      string
+		expectedRequestPath string
+		expectedRawQuery    string
+		expectedErrString   string
+		expectedPage        int
+		expectedPerPage     int
+		expectedFirstPage   int
+		expectedLastPage    int
+		expectedTotalCount  int
+		expectedUsersLen    int
+	}{
+		{
+			desc:         "success",
+			inputItemID:  "b4ca1773580317e7112e",
+			inputPage:    3,
+			inputPerPage: 2,
+
+			mockResponseHeaderFile: "success-header",
+			mockResponseBodyFile:   "success-body",
+
+			expectedMethod:      http.MethodGet,
+			expectedRequestPath: "/items/b4ca1773580317e7112e/stockers",
+			expectedRawQuery:    "page=3&per_page=2",
+			expectedPage:        3,
+			expectedPerPage:     2,
+			expectedFirstPage:   1,
+			expectedLastPage:    100,
+			expectedTotalCount:  289,
+			expectedUsersLen:    2,
+		},
+		{
+			desc:         "failure-out_of_range",
+			inputItemID:  "b4ca1773580317e7112e",
+			inputPage:    101,
+			inputPerPage: 2,
+
+			mockResponseHeaderFile: "out_of_range-header",
+			mockResponseBodyFile:   "out_of_range-body",
+
+			expectedMethod:      http.MethodGet,
+			expectedRequestPath: "/items/b4ca1773580317e7112e/stockers",
+			expectedRawQuery:    "page=101&per_page=2",
+			expectedErrString:   "page parameter should be",
+		},
+		{
+			desc:         "failure-not_found",
+			inputItemID:  "nonexistent",
+			inputPage:    3,
+			inputPerPage: 2,
+
+			mockResponseHeaderFile: "not_exist-header",
+			mockResponseBodyFile:   "not_exist-body",
+
+			expectedMethod:      http.MethodGet,
+			expectedRequestPath: "/items/nonexistent/stockers",
+			expectedRawQuery:    "page=3&per_page=2",
+			expectedErrString:   "not found",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			cli, teardown := setup(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, tt.expectedRawQuery)
+			defer teardown()
+
+			usersResp, err := cli.GetItemStockers(context.Background(), tt.inputItemID, tt.inputPage, tt.inputPerPage)
+			if tt.expectedErrString == "" {
+				if !assert.Nil(t, err) {
+					t.FailNow()
+				}
+
+				assert.Equal(t, tt.expectedPage, usersResp.Page)
+				assert.Equal(t, tt.expectedPerPage, usersResp.PerPage)
+				assert.Equal(t, tt.expectedFirstPage, usersResp.FirstPage)
+				assert.Equal(t, tt.expectedLastPage, usersResp.LastPage)
+				assert.Equal(t, tt.expectedTotalCount, usersResp.TotalCount)
+				assert.Equal(t, tt.expectedUsersLen, len(usersResp.Users))
 			} else {
 				if !assert.NotNil(t, err) {
 					t.FailNow()

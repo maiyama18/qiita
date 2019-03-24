@@ -141,9 +141,34 @@ func (c *Client) GetItemComments(ctx context.Context, itemID string) ([]*Comment
 //
 // GET /api/v2/items/:item_id/stockers
 // document: http://qiita.com/api/v2/docs#get-apiv2itemsitem_idstockers
-func (c *Client) GetItemStockers(ctx context.Context, itemID string) ([]*User, error) {
-	// TODO: implement
-	return nil, nil
+func (c *Client) GetItemStockers(ctx context.Context, itemID string, page, perPage int) (*UsersResponse, error) {
+	if err := validatePaginationLimit(page, perPage); err != nil {
+		return nil, err
+	}
+
+	query := map[string]string{
+		"page":     strconv.Itoa(page),
+		"per_page": strconv.Itoa(perPage),
+	}
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("items", itemID, "stockers"), query, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var users []*User
+	code, header, err := c.doRequest(req, &users)
+	if err != nil {
+		return nil, err
+	}
+
+	switch code {
+	case http.StatusOK:
+		return newUsersResponse(users, header, page, perPage)
+	case http.StatusNotFound:
+		return nil, fmt.Errorf("item with id '%s' not found (status = %d)", itemID, code)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 // CreateItem posts the item.
