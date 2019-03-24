@@ -80,7 +80,7 @@ func (c *Client) GetUser(ctx context.Context, userID string) (*User, error) {
 //
 // GET /api/v2/users
 // document: https://qiita.com/api/v2/docs#get-apiv2users
-func (c *Client) GetUsers(ctx context.Context, page int, perPage int) (*UsersResponse, error) {
+func (c *Client) GetUsers(ctx context.Context, page, perPage int) (*UsersResponse, error) {
 	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func (c *Client) GetUsers(ctx context.Context, page int, perPage int) (*UsersRes
 //
 // GET /api/v2/users/:user_id/followees
 // document: http://qiita.com/api/v2/docs#get-apiv2usersuser_idfollowees
-func (c *Client) GetUserFollowees(ctx context.Context, userID string, page int, perPage int) (*UsersResponse, error) {
+func (c *Client) GetUserFollowees(ctx context.Context, userID string, page, perPage int) (*UsersResponse, error) {
 	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
 		return nil, err
 	}
@@ -160,7 +160,7 @@ func (c *Client) GetUserFollowees(ctx context.Context, userID string, page int, 
 //
 // GET /api/v2/users/:user_id/followers
 // document: https://qiita.com/api/v2/docs#get-apiv2usersuser_idfollowers
-func (c *Client) GetUserFollowers(ctx context.Context, userID string, page int, perPage int) (*UsersResponse, error) {
+func (c *Client) GetUserFollowers(ctx context.Context, userID string, page, perPage int) (*UsersResponse, error) {
 	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
 		return nil, err
 	}
@@ -200,9 +200,40 @@ func (c *Client) GetUserFollowers(ctx context.Context, userID string, page int, 
 //
 // GET /api/v2/users/:user_id/items
 // document: https://qiita.com/api/v2/docs#get-apiv2usersuser_iditems
-func (c *Client) GetUserItems(ctx context.Context, userID string) ([]*Item, error) {
-	// TODO: implement
-	return nil, nil
+func (c *Client) GetUserItems(ctx context.Context, userID string, page, perPage int) (*ItemsResponse, error) {
+	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
+		return nil, err
+	}
+
+	query := map[string]string{
+		"page":     strconv.Itoa(page),
+		"per_page": strconv.Itoa(perPage),
+	}
+	req, err := c.newRequest(ctx, "GET", path.Join("users", userID, "items"), query, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var items []*Item
+	code, header, err := c.doRequest(req, &items)
+	if err != nil {
+		return nil, err
+	}
+	if code < 200 || 300 <= code {
+		switch code {
+		case http.StatusNotFound:
+			return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
+		default:
+			return nil, fmt.Errorf("unknown error (status = %d)", code)
+		}
+	}
+
+	paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
+	if err != nil {
+		return nil, err
+	}
+
+	return constructItemsResponse(items, paginationInfo), nil
 }
 
 // GetUserStocks fetches the items stocked by the user having provided userID.

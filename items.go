@@ -35,6 +35,16 @@ type ItemTag struct {
 	Versions []string `json:"versions"`
 }
 
+// ItemsResponse represents a response from qiita API which returns multiple items.
+type ItemsResponse struct {
+	Items      []*Item
+	PerPage    int
+	Page       int
+	FirstPage  int
+	LastPage   int
+	TotalCount int
+}
+
 // ItemDraft represents an item to be posted for qiita.
 type ItemDraft struct {
 	Title   string `json:"title"`
@@ -164,4 +174,15 @@ func (c *Client) StockItem(ctx context.Context, itemID string) error {
 func (c *Client) UnstockItem(ctx context.Context, itemID string) error {
 	// TODO: implement
 	return nil
+}
+
+func constructItemsResponse(items []*Item, info *paginationInfo) *ItemsResponse {
+	return &ItemsResponse{
+		Items:      items,
+		PerPage:    info.PerPage,
+		Page:       info.Page,
+		FirstPage:  info.FirstPage,
+		LastPage:   info.LastPage,
+		TotalCount: info.TotalCount,
+	}
 }
