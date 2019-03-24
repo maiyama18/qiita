@@ -32,7 +32,7 @@ func (c *Client) newRequest(ctx context.Context, method string, relativePath str
 	}
 
 	req = req.WithContext(ctx)
-	req.Header.Set("User-Agent", "qiita go-client (github.com/muiscript/qiita)")
+	req.Header.Set("User-Agent", c.UserAgent)
 	if c.AccessToken != "" {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
 	}
@@ -44,6 +44,9 @@ func (c *Client) doRequest(req *http.Request, body interface{}) (int, http.Heade
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return 0, nil, err
+	}
+	if resp.StatusCode < 200 || 300 <= resp.StatusCode {
+		return resp.StatusCode, resp.Header, nil
 	}
 	defer func() {
 		_ = resp.Body.Close()
@@ -64,18 +67,18 @@ func (c *Client) doRequest(req *http.Request, body interface{}) (int, http.Heade
 	return resp.StatusCode, resp.Header, nil
 }
 
-func (c *Client) validatePaginationLimit(page, pageMin, pageMax, perPage, perPageMin, perPageMax int) error {
-	if page < pageMin || pageMax < page {
-		return fmt.Errorf("page parameter should be between 1 and 100. got %d", page)
+func (c *Client) validatePaginationLimit(page, perPage int) error {
+	if page < PageMin || PageMax < page {
+		return fmt.Errorf("page parameter should be between %d and %d. got %d", PageMin, PageMax, page)
 	}
-	if perPage < perPageMin || perPageMax < perPage {
-		return fmt.Errorf("perPage parameter should be between 1 and 100. got %d", perPage)
+	if perPage < PerPageMin || PerPageMax < perPage {
+		return fmt.Errorf("perPage parameter should be between %d and %d. got %d", PerPageMin, PerPageMax, perPage)
 	}
 	return nil
 }
 
-func (c *Client) extractPaginationInfo(header http.Header, page int, perPage int) (*paginationInfo, error) {
-	links, err := c.parseHeaderLink(header)
+func extractPaginationInfo(header http.Header, page int, perPage int) (*paginationInfo, error) {
+	links, err := parseHeaderLink(header)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +105,7 @@ func (c *Client) extractPaginationInfo(header http.Header, page int, perPage int
 	}, nil
 }
 
-func (c *Client) parseHeaderLink(header http.Header) (map[string]*url.URL, error) {
+func parseHeaderLink(header http.Header) (map[string]*url.URL, error) {
 	links := make(map[string]*url.URL)
 
 	linksStr := header.Get("link")

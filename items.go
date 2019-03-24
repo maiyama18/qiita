@@ -35,6 +35,32 @@ type ItemTag struct {
 	Versions []string `json:"versions"`
 }
 
+// ItemsResponse represents a response from qiita API which includes multiple items.
+type ItemsResponse struct {
+	Items      []*Item
+	PerPage    int
+	Page       int
+	FirstPage  int
+	LastPage   int
+	TotalCount int
+}
+
+func newItemsResponse(items []*Item, header http.Header, page, perPage int) (*ItemsResponse, error) {
+	paginationInfo, err := extractPaginationInfo(header, page, perPage)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ItemsResponse{
+		Items:      items,
+		PerPage:    paginationInfo.PerPage,
+		Page:       paginationInfo.Page,
+		FirstPage:  paginationInfo.FirstPage,
+		LastPage:   paginationInfo.LastPage,
+		TotalCount: paginationInfo.TotalCount,
+	}, nil
+}
+
 // ItemDraft represents an item to be posted for qiita.
 type ItemDraft struct {
 	Title   string `json:"title"`
@@ -48,7 +74,7 @@ type ItemDraft struct {
 // GET /api/v2/items/:item_id
 // document: https://qiita.com/api/v2/docs#get-apiv2itemsitem_id
 func (c *Client) GetItem(ctx context.Context, itemID string) (*Item, error) {
-	req, err := c.newRequest(ctx, "GET", path.Join("items", itemID), nil, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("items", itemID), nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -58,16 +84,15 @@ func (c *Client) GetItem(ctx context.Context, itemID string) (*Item, error) {
 	if err != nil {
 		return nil, err
 	}
-	if code < 200 || 300 <= code {
-		switch code {
-		case http.StatusNotFound:
-			return nil, fmt.Errorf("item with id '%s' not found (status = %d)", itemID, code)
-		default:
-			return nil, fmt.Errorf("unknown error (status = %d)", code)
-		}
-	}
 
-	return &item, nil
+	switch code {
+	case http.StatusOK:
+		return &item, nil
+	case http.StatusNotFound:
+		return nil, fmt.Errorf("item with id '%s' not found (status = %d)", itemID, code)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 // GetItems fetches all the items posted on qiita.

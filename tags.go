@@ -2,6 +2,7 @@ package qiita
 
 import (
 	"context"
+	"net/http"
 )
 
 // Tag represents tag which can be attached to a qiita item.
@@ -10,6 +11,32 @@ type Tag struct {
 	IconURL        string `json:"icon_url"`
 	ItemsCount     int    `json:"items_count"`
 	FollowersCount int    `json:"followers_count"`
+}
+
+// TagsResponse represents a response from qiita API which includes multiple tags.
+type TagsResponse struct {
+	Tags       []*Tag
+	PerPage    int
+	Page       int
+	FirstPage  int
+	LastPage   int
+	TotalCount int
+}
+
+func newTagsResponse(tags []*Tag, header http.Header, page, perPage int) (*TagsResponse, error) {
+	paginationInfo, err := extractPaginationInfo(header, page, perPage)
+	if err != nil {
+		return nil, err
+	}
+
+	return &TagsResponse{
+		Tags:       tags,
+		PerPage:    paginationInfo.PerPage,
+		Page:       paginationInfo.Page,
+		FirstPage:  paginationInfo.FirstPage,
+		LastPage:   paginationInfo.LastPage,
+		TotalCount: paginationInfo.TotalCount,
+	}, nil
 }
 
 // GetTag fetches the tag having provided tagID.
