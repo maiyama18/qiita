@@ -488,7 +488,7 @@ func TestClient_GetUserItems(t *testing.T) {
 			mockResponseBodyFile:   "success-body",
 
 			expectedMethod:      http.MethodGet,
-			expectedRequestPath: "/users/muiscript/followers",
+			expectedRequestPath: "/users/muiscript/items",
 			expectedRawQuery:    "page=2&per_page=2",
 			expectedPage:        2,
 			expectedPerPage:     2,
@@ -507,7 +507,7 @@ func TestClient_GetUserItems(t *testing.T) {
 			mockResponseBodyFile:   "out_of_range-body",
 
 			expectedMethod:      http.MethodGet,
-			expectedRequestPath: "/users/muiscript/followers",
+			expectedRequestPath: "/users/muiscript/fitems",
 			expectedRawQuery:    "page=101&per_page=2",
 			expectedErrString:   "page parameter should be",
 		},
@@ -521,7 +521,7 @@ func TestClient_GetUserItems(t *testing.T) {
 			mockResponseBodyFile:   "not_exist-body",
 
 			expectedMethod:      http.MethodGet,
-			expectedRequestPath: "/users/nonexistent/followers",
+			expectedRequestPath: "/users/nonexistent/items",
 			expectedRawQuery:    "page=2&per_page=2",
 			expectedErrString:   "not found",
 		},
@@ -532,18 +532,18 @@ func TestClient_GetUserItems(t *testing.T) {
 			cli, teardown := setup(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, tt.expectedRawQuery)
 			defer teardown()
 
-			usersResp, err := cli.GetUserFollowers(context.Background(), tt.inputUserID, tt.inputPage, tt.inputPerPage)
+			itemsResp, err := cli.GetUserItems(context.Background(), tt.inputUserID, tt.inputPage, tt.inputPerPage)
 			if tt.expectedErrString == "" {
 				if !assert.Nil(t, err) {
 					t.FailNow()
 				}
 
-				assert.Equal(t, tt.expectedPage, usersResp.Page)
-				assert.Equal(t, tt.expectedPerPage, usersResp.PerPage)
-				assert.Equal(t, tt.expectedFirstPage, usersResp.FirstPage)
-				assert.Equal(t, tt.expectedLastPage, usersResp.LastPage)
-				assert.Equal(t, tt.expectedTotalCount, usersResp.TotalCount)
-				assert.Equal(t, tt.expectedItemsLen, len(usersResp.Users))
+				assert.Equal(t, tt.expectedPage, itemsResp.Page)
+				assert.Equal(t, tt.expectedPerPage, itemsResp.PerPage)
+				assert.Equal(t, tt.expectedFirstPage, itemsResp.FirstPage)
+				assert.Equal(t, tt.expectedLastPage, itemsResp.LastPage)
+				assert.Equal(t, tt.expectedTotalCount, itemsResp.TotalCount)
+				assert.Equal(t, tt.expectedItemsLen, len(itemsResp.Items))
 			} else {
 				if !assert.NotNil(t, err) {
 					t.FailNow()
