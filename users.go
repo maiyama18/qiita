@@ -378,8 +378,27 @@ func (c *Client) FollowUser(ctx context.Context, userID string) error {
 // DELETE /api/v2/users/:user_id/following
 // document: http://qiita.com/api/v2/docs#delete-apiv2usersuser_idfollowing
 func (c *Client) UnfollowUser(ctx context.Context, userID string) error {
-	// TODO: implement
-	return nil
+	req, err := c.newRequest(ctx, http.MethodDelete, path.Join("users", userID, "following"), nil, nil)
+	if err != nil {
+		return err
+	}
+
+	code, _, err := c.doRequest(req, &struct{}{})
+	if err != nil {
+		return err
+	}
+	switch code {
+	case http.StatusNoContent:
+		return nil
+	case http.StatusUnauthorized:
+		return fmt.Errorf("unauthorized. you may have provided no/invalid access token (status = %d)", code)
+	case http.StatusNotFound:
+		return fmt.Errorf("not found. user with id '%s' does not exist (status = %d)", userID, code)
+	case http.StatusForbidden:
+		return fmt.Errorf("forbidden. you may already have not followed user with id '%s' (status = %d)", userID, code)
+	default:
+		return fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 // GetAuthenticatedUser returns the user who is associated with provided access token.

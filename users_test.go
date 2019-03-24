@@ -804,13 +804,13 @@ func TestClient_FollowUser(t *testing.T) {
 		},
 		{
 			desc:        "failure-no_token",
-			inputUserID: "mizchi",
+			inputUserID: "yaotti",
 
 			mockResponseHeaderFile: "no_token-header",
 			mockResponseBodyFile:   "no_token-body",
 
 			expectedMethod:      http.MethodPut,
-			expectedRequestPath: "/users/mizchi/following",
+			expectedRequestPath: "/users/yaotti/following",
 			expectedErrString:   "unauthorized",
 		},
 	}
@@ -821,6 +821,88 @@ func TestClient_FollowUser(t *testing.T) {
 			defer teardown()
 
 			err := cli.FollowUser(context.Background(), tt.inputUserID)
+			if tt.expectedErrString == "" {
+				if !assert.Nil(t, err) {
+					t.FailNow()
+				}
+			} else {
+				if !assert.NotNil(t, err) {
+					t.FailNow()
+				}
+
+				assert.True(t, strings.Contains(err.Error(), tt.expectedErrString), fmt.Sprintf("'%s' should contain '%s'", err.Error(), tt.expectedErrString))
+			}
+
+		})
+	}
+}
+
+func TestClient_UnfollowUser(t *testing.T) {
+	mockFilesBaseDir := path.Join("testdata", "responses", "users", "UnfollowUser")
+
+	tests := []struct {
+		desc        string
+		inputUserID string
+
+		mockResponseHeaderFile string
+		mockResponseBodyFile   string
+
+		expectedMethod      string
+		expectedRequestPath string
+		expectedRawQuery    string
+		expectedErrString   string
+	}{
+		{
+			desc:        "success",
+			inputUserID: "mizchi",
+
+			mockResponseHeaderFile: "success-header",
+			mockResponseBodyFile:   "success-body",
+
+			expectedMethod:      http.MethodDelete,
+			expectedRequestPath: "/users/mizchi/following",
+		},
+		{
+			desc:        "failure-not_following",
+			inputUserID: "yaotti",
+
+			mockResponseHeaderFile: "not_following-header",
+			mockResponseBodyFile:   "not_following-body",
+
+			expectedMethod:      http.MethodDelete,
+			expectedRequestPath: "/users/yaotti/following",
+			expectedErrString:   "forbidden. you may already have not followed",
+		},
+		{
+			desc:        "failure-not_exist",
+			inputUserID: "nonexistent",
+
+			mockResponseHeaderFile: "not_exist-header",
+			mockResponseBodyFile:   "not_exist-body",
+
+			expectedMethod:      http.MethodDelete,
+			expectedRequestPath: "/users/nonexistent/following",
+			expectedErrString:   "not found",
+		},
+		{
+			desc:        "failure-no_token",
+			inputUserID: "mizchi",
+
+			mockResponseHeaderFile: "no_token-header",
+			mockResponseBodyFile:   "no_token-body",
+
+			expectedMethod:      http.MethodDelete,
+			expectedRequestPath: "/users/mizchi/following",
+			expectedErrString:   "unauthorized",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			cli, teardown := setup(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, tt.expectedRawQuery)
+			defer teardown()
+
+			err := cli.UnfollowUser(context.Background(), tt.inputUserID)
 			if tt.expectedErrString == "" {
 				if !assert.Nil(t, err) {
 					t.FailNow()
