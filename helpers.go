@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
@@ -39,18 +40,72 @@ func (c *Client) newRequest(ctx context.Context, method string, relativePath str
 	return req, nil
 }
 
-func (c *Client) decodeBody(resp *http.Response, out interface{}) error {
+func (c *Client) doRequest(req *http.Request, body interface{}) (int, http.Header, error) {
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return 0, nil, err
+	}
 	defer func() {
 		_ = resp.Body.Close()
 	}()
-	decoder := json.NewDecoder(resp.Body)
-	return decoder.Decode(out)
+	c.Logger.Printf("send %s request to %s\n", req.Method, c.URL.String())
+
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	if len(bodyBytes) > 0 {
+		if err := json.Unmarshal(bodyBytes, body); err != nil {
+			return 0, nil, err
+		}
+	}
+
+	return resp.StatusCode, resp.Header, nil
 }
 
-func (c *Client) parseHeaderLink(resp *http.Response) (map[string]*url.URL, error) {
+func (c *Client) validatePaginationLimit(page, pageMin, pageMax, perPage, perPageMin, perPageMax int) error {
+	if page < pageMin || pageMax < page {
+		return fmt.Errorf("page parameter should be between 1 and 100. got %d", page)
+	}
+	if perPage < perPageMin || perPageMax < perPage {
+		return fmt.Errorf("perPage parameter should be between 1 and 100. got %d", perPage)
+	}
+	return nil
+}
+
+func (c *Client) extractPaginationInfo(header http.Header, page int, perPage int) (*paginationInfo, error) {
+	links, err := c.parseHeaderLink(header)
+	if err != nil {
+		return nil, err
+	}
+	lastURL := links["last"]
+	lastPage, err := strconv.Atoi(lastURL.Query().Get("page"))
+	if err != nil {
+		return nil, err
+	}
+	if lastPage > 100 {
+		lastPage = 100
+	}
+
+	totalCount, err := strconv.Atoi(header.Get("total-count"))
+	if err != nil {
+		return nil, err
+	}
+
+	return &paginationInfo{
+		Page:       page,
+		PerPage:    perPage,
+		FirstPage:  1,
+		LastPage:   lastPage,
+		TotalCount: totalCount,
+	}, nil
+}
+
+func (c *Client) parseHeaderLink(header http.Header) (map[string]*url.URL, error) {
 	links := make(map[string]*url.URL)
 
-	linksStr := resp.Header.Get("link")
+	linksStr := header.Get("link")
 	rx := regexp.MustCompile("<(.*)>.*rel=\"(.*)\"")
 
 	for _, link := range strings.Split(linksStr, ", ") {
@@ -66,42 +121,4 @@ func (c *Client) parseHeaderLink(resp *http.Response) (map[string]*url.URL, erro
 	}
 
 	return links, nil
-}
-
-func (c *Client) validatePaginationLimit(page, pageMin, pageMax, perPage, perPageMin, perPageMax int) error {
-	if page < pageMin || pageMax < page {
-		return fmt.Errorf("page parameter should be between 1 and 100. got %d", page)
-	}
-	if perPage < perPageMin || perPageMax < perPage {
-		return fmt.Errorf("perPage parameter should be between 1 and 100. got %d", perPage)
-	}
-	return nil
-}
-
-func (c *Client) extractPaginationInfo(resp *http.Response, page int, perPage int) (*paginationInfo, error) {
-	links, err := c.parseHeaderLink(resp)
-	if err != nil {
-		return nil, err
-	}
-	lastURL := links["last"]
-	lastPage, err := strconv.Atoi(lastURL.Query().Get("page"))
-	if err != nil {
-		return nil, err
-	}
-	if lastPage > 100 {
-		lastPage = 100
-	}
-
-	totalCount, err := strconv.Atoi(resp.Header.Get("total-count"))
-	if err != nil {
-		return nil, err
-	}
-
-	return &paginationInfo{
-		Page:       page,
-		PerPage:    perPage,
-		FirstPage:  1,
-		LastPage:   lastPage,
-		TotalCount: totalCount,
-	}, nil
 }

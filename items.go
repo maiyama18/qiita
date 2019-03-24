@@ -52,24 +52,19 @@ func (c *Client) GetItem(ctx context.Context, itemID string) (*Item, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.Logger.Printf("send get request to %s\n", c.URL.String())
 
-	resp, err := c.HTTPClient.Do(req)
+	var item Item
+	code, _, err := c.doRequest(req, &item)
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode != http.StatusOK {
-		switch resp.StatusCode {
+	if code < 200 || 300 <= code {
+		switch code {
 		case http.StatusNotFound:
-			return nil, fmt.Errorf("item with id '%s' not found (status = %d)", itemID, resp.StatusCode)
+			return nil, fmt.Errorf("item with id '%s' not found (status = %d)", itemID, code)
 		default:
-			return nil, fmt.Errorf("unknown error (status = %d)", resp.StatusCode)
+			return nil, fmt.Errorf("unknown error (status = %d)", code)
 		}
-	}
-
-	var item Item
-	if err := c.decodeBody(resp, &item); err != nil {
-		return nil, err
 	}
 
 	return &item, nil

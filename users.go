@@ -58,22 +58,18 @@ func (c *Client) GetUser(ctx context.Context, userID string) (*User, error) {
 	}
 	c.Logger.Printf("send get request to %s\n", c.URL.String())
 
-	resp, err := c.HTTPClient.Do(req)
+	var user User
+	code, _, err := c.doRequest(req, &user)
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode != http.StatusOK {
-		switch resp.StatusCode {
+	if code < 200 || 300 <= code {
+		switch code {
 		case http.StatusNotFound:
-			return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, resp.StatusCode)
+			return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
 		default:
-			return nil, fmt.Errorf("unknown error (status = %d)", resp.StatusCode)
+			return nil, fmt.Errorf("unknown error (status = %d)", code)
 		}
-	}
-
-	var user User
-	if err := c.decodeBody(resp, &user); err != nil {
-		return nil, err
 	}
 
 	return &user, nil
@@ -97,19 +93,20 @@ func (c *Client) GetUsers(ctx context.Context, page int, perPage int) (*UsersRes
 	if err != nil {
 		return nil, err
 	}
-	c.Logger.Printf("send get request to %s\n", c.URL.String())
 
-	resp, err := c.HTTPClient.Do(req)
+	var users []*User
+	code, header, err := c.doRequest(req, &users)
 	if err != nil {
 		return nil, err
 	}
-
-	var users []*User
-	if err := c.decodeBody(resp, &users); err != nil {
-		return nil, err
+	if code < 200 || 300 <= code {
+		switch code {
+		default:
+			return nil, fmt.Errorf("unknown error (status = %d)", code)
+		}
 	}
 
-	paginationInfo, err := c.extractPaginationInfo(resp, page, perPage)
+	paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
 	if err != nil {
 		return nil, err
 	}
@@ -135,27 +132,22 @@ func (c *Client) GetUserFollowees(ctx context.Context, userID string, page int, 
 	if err != nil {
 		return nil, err
 	}
-	c.Logger.Printf("send get request to %s\n", c.URL.String())
 
-	resp, err := c.HTTPClient.Do(req)
+	var users []*User
+	code, header, err := c.doRequest(req, &users)
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode < 200 || 300 <= resp.StatusCode {
-		switch resp.StatusCode {
+	if code < 200 || 300 <= code {
+		switch code {
 		case http.StatusNotFound:
-			return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, resp.StatusCode)
+			return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
 		default:
-			return nil, fmt.Errorf("unknown error (status = %d)", resp.StatusCode)
+			return nil, fmt.Errorf("unknown error (status = %d)", code)
 		}
 	}
 
-	var users []*User
-	if err := c.decodeBody(resp, &users); err != nil {
-		return nil, err
-	}
-
-	paginationInfo, err := c.extractPaginationInfo(resp, page, perPage)
+	paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
 	if err != nil {
 		return nil, err
 	}
@@ -181,19 +173,22 @@ func (c *Client) GetUserFollowers(ctx context.Context, userID string, page int, 
 	if err != nil {
 		return nil, err
 	}
-	c.Logger.Printf("send get request to %s\n", c.URL.String())
 
-	resp, err := c.HTTPClient.Do(req)
+	var users []*User
+	code, header, err := c.doRequest(req, &users)
 	if err != nil {
 		return nil, err
 	}
-
-	var users []*User
-	if err := c.decodeBody(resp, &users); err != nil {
-		return nil, err
+	if code < 200 || 300 <= code {
+		switch code {
+		case http.StatusNotFound:
+			return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
+		default:
+			return nil, fmt.Errorf("unknown error (status = %d)", code)
+		}
 	}
 
-	paginationInfo, err := c.extractPaginationInfo(resp, page, perPage)
+	paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
 	if err != nil {
 		return nil, err
 	}
@@ -238,22 +233,20 @@ func (c *Client) IsFollowingUser(ctx context.Context, userID string) (bool, erro
 	if err != nil {
 		return false, err
 	}
-	c.Logger.Printf("send get request to %s\n", c.URL.String())
 
-	resp, err := c.HTTPClient.Do(req)
+	code, _, err := c.doRequest(req, &struct{}{})
 	if err != nil {
 		return false, err
 	}
-
-	switch resp.StatusCode {
+	switch code {
 	case http.StatusNoContent:
 		return true, nil
 	case http.StatusNotFound:
 		return false, nil
 	case http.StatusUnauthorized:
-		return false, fmt.Errorf("unauthorized. you may have provided no/invalid access token (status = %d)", resp.StatusCode)
+		return false, fmt.Errorf("unauthorized. you may have provided no/invalid access token (status = %d)", code)
 	default:
-		return false, fmt.Errorf("unknown error (status = %d)", resp.StatusCode)
+		return false, fmt.Errorf("unknown error (status = %d)", code)
 	}
 }
 
