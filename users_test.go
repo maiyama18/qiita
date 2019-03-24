@@ -754,3 +754,85 @@ func TestClient_GetUserFollowingTags(t *testing.T) {
 		})
 	}
 }
+
+func TestClient_FollowUser(t *testing.T) {
+	mockFilesBaseDir := path.Join("testdata", "responses", "users", "FollowUser")
+
+	tests := []struct {
+		desc        string
+		inputUserID string
+
+		mockResponseHeaderFile string
+		mockResponseBodyFile   string
+
+		expectedMethod      string
+		expectedRequestPath string
+		expectedRawQuery    string
+		expectedErrString   string
+	}{
+		{
+			desc:        "success",
+			inputUserID: "yaotti",
+
+			mockResponseHeaderFile: "success-header",
+			mockResponseBodyFile:   "success-body",
+
+			expectedMethod:      http.MethodPut,
+			expectedRequestPath: "/users/yaotti/following",
+		},
+		{
+			desc:        "failure-already_following",
+			inputUserID: "mizchi",
+
+			mockResponseHeaderFile: "already_following-header",
+			mockResponseBodyFile:   "already_following-body",
+
+			expectedMethod:      http.MethodPut,
+			expectedRequestPath: "/users/mizchi/following",
+			expectedErrString:   "forbidden. you may already have followed",
+		},
+		{
+			desc:        "failure-not_exist",
+			inputUserID: "nonexistent",
+
+			mockResponseHeaderFile: "not_exist-header",
+			mockResponseBodyFile:   "not_exist-body",
+
+			expectedMethod:      http.MethodPut,
+			expectedRequestPath: "/users/nonexistent/following",
+			expectedErrString:   "not found",
+		},
+		{
+			desc:        "failure-no_token",
+			inputUserID: "mizchi",
+
+			mockResponseHeaderFile: "no_token-header",
+			mockResponseBodyFile:   "no_token-body",
+
+			expectedMethod:      http.MethodPut,
+			expectedRequestPath: "/users/mizchi/following",
+			expectedErrString:   "unauthorized",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			cli, teardown := setup(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, tt.expectedRawQuery)
+			defer teardown()
+
+			err := cli.FollowUser(context.Background(), tt.inputUserID)
+			if tt.expectedErrString == "" {
+				if !assert.Nil(t, err) {
+					t.FailNow()
+				}
+			} else {
+				if !assert.NotNil(t, err) {
+					t.FailNow()
+				}
+
+				assert.True(t, strings.Contains(err.Error(), tt.expectedErrString), fmt.Sprintf("'%s' should contain '%s'", err.Error(), tt.expectedErrString))
+			}
+
+		})
+	}
+}

@@ -334,10 +334,10 @@ func (c *Client) IsFollowingUser(ctx context.Context, userID string) (bool, erro
 	switch code {
 	case http.StatusNoContent:
 		return true, nil
-	case http.StatusNotFound:
-		return false, nil
 	case http.StatusUnauthorized:
 		return false, fmt.Errorf("unauthorized. you may have provided no/invalid access token (status = %d)", code)
+	case http.StatusNotFound:
+		return false, nil
 	default:
 		return false, fmt.Errorf("unknown error (status = %d)", code)
 	}
@@ -349,8 +349,27 @@ func (c *Client) IsFollowingUser(ctx context.Context, userID string) (bool, erro
 // PUT /api/v2/users/:user_id/following
 // document: http://qiita.com/api/v2/docs#put-apiv2usersuser_idfollowing
 func (c *Client) FollowUser(ctx context.Context, userID string) error {
-	// TODO: implement
-	return nil
+	req, err := c.newRequest(ctx, http.MethodPut, path.Join("users", userID, "following"), nil, nil)
+	if err != nil {
+		return err
+	}
+
+	code, _, err := c.doRequest(req, &struct{}{})
+	if err != nil {
+		return err
+	}
+	switch code {
+	case http.StatusNoContent:
+		return nil
+	case http.StatusUnauthorized:
+		return fmt.Errorf("unauthorized. you may have provided no/invalid access token (status = %d)", code)
+	case http.StatusNotFound:
+		return fmt.Errorf("not found. user with id '%s' does not exist (status = %d)", userID, code)
+	case http.StatusForbidden:
+		return fmt.Errorf("forbidden. you may already have followed user with id '%s' (status = %d)", userID, code)
+	default:
+		return fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 // UnfollowUser unfollows the user having provided userID.

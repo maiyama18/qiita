@@ -1,0 +1,18 @@
+HTTP/2 204 
+date: Sun, 24 Mar 2019 05:02:54 GMT
+server: nginx
+x-frame-options: SAMEORIGIN
+x-xss-protection: 1; mode=block
+x-content-type-options: nosniff
+x-download-options: noopen
+x-permitted-cross-domain-policies: none
+referrer-policy: strict-origin-when-cross-origin
+cache-control: no-cache
+rate-limit: 1000
+rate-remaining: 997
+rate-reset: 1553407276
+vary: Origin
+x-runtime: 0.221782
+strict-transport-security: max-age=2592000
+x-request-id: 0bbc9fb9-cedc-4603-905e-31e29973794b
+
