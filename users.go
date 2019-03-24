@@ -240,9 +240,40 @@ func (c *Client) GetUserItems(ctx context.Context, userID string, page, perPage 
 //
 // GET /api/v2/users/:user_id/stocks
 // document: http://qiita.com/api/v2/docs#get-apiv2usersuser_idstocks
-func (c *Client) GetUserStocks(ctx context.Context, userID string) ([]*Item, error) {
-	// TODO: implement
-	return nil, nil
+func (c *Client) GetUserStocks(ctx context.Context, userID string, page, perPage int) (*ItemsResponse, error) {
+	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
+		return nil, err
+	}
+
+	query := map[string]string{
+		"page":     strconv.Itoa(page),
+		"per_page": strconv.Itoa(perPage),
+	}
+	req, err := c.newRequest(ctx, "GET", path.Join("users", userID, "stocks"), query, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var items []*Item
+	code, header, err := c.doRequest(req, &items)
+	if err != nil {
+		return nil, err
+	}
+	if code < 200 || 300 <= code {
+		switch code {
+		case http.StatusNotFound:
+			return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
+		default:
+			return nil, fmt.Errorf("unknown error (status = %d)", code)
+		}
+	}
+
+	paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
+	if err != nil {
+		return nil, err
+	}
+
+	return constructItemsResponse(items, paginationInfo), nil
 }
 
 // GetUserFollowingTags fetches the tags followed by the user having provided userID.
