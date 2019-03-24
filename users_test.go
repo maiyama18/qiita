@@ -311,6 +311,20 @@ func TestClient_GetUserFollowees(t *testing.T) {
 			expectedRawQuery:    "page=0&per_page=2",
 			expectedErrString:   "page parameter should be",
 		},
+		{
+			desc:         "failure-not_exist",
+			inputUserID:  "nonexistent",
+			inputPage:    2,
+			inputPerPage: 2,
+
+			mockResponseHeaderFile: "not_exist-header",
+			mockResponseBodyFile:   "not_exist-body",
+
+			expectedMethod:      http.MethodGet,
+			expectedRequestPath: "/users/nonexistent/followees",
+			expectedRawQuery:    "page=2&per_page=2",
+			expectedErrString:   "not found",
+		},
 	}
 
 	for _, tt := range tests {
@@ -384,7 +398,7 @@ func TestClient_GetUserFollowers(t *testing.T) {
 			expectedUsersLen:    2,
 		},
 		{
-			desc:         "failure_page_less_than_100",
+			desc:         "failure-page_out_of_range",
 			inputUserID:  "muiscript",
 			inputPage:    0,
 			inputPerPage: 2,
@@ -396,6 +410,20 @@ func TestClient_GetUserFollowers(t *testing.T) {
 			expectedRequestPath: "/users/muiscript/followers",
 			expectedRawQuery:    "page=0&per_page=2",
 			expectedErrString:   "page parameter should be",
+		},
+		{
+			desc:         "failure-not_exist",
+			inputUserID:  "nonexistent",
+			inputPage:    2,
+			inputPerPage: 2,
+
+			mockResponseHeaderFile: "not_exist-header",
+			mockResponseBodyFile:   "not_exist-body",
+
+			expectedMethod:      http.MethodGet,
+			expectedRequestPath: "/users/nonexistent/followers",
+			expectedRawQuery:    "page=2&per_page=2",
+			expectedErrString:   "not found",
 		},
 	}
 

@@ -45,6 +45,9 @@ func (c *Client) doRequest(req *http.Request, body interface{}) (int, http.Heade
 	if err != nil {
 		return 0, nil, err
 	}
+	if resp.StatusCode < 200 || 300 <= resp.StatusCode {
+		return resp.StatusCode, resp.Header, nil
+	}
 	defer func() {
 		_ = resp.Body.Close()
 	}()
