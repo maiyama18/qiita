@@ -29,7 +29,7 @@ type User struct {
 	TwitterID  string `json:"twitter_screen_name"`
 }
 
-// UsersResponse represents a response from qiita API which returns multiple users.
+// UsersResponse represents a response from qiita API which includes multiple users.
 type UsersResponse struct {
 	Users      []*User
 	PerPage    int
@@ -280,9 +280,40 @@ func (c *Client) GetUserStocks(ctx context.Context, userID string, page, perPage
 //
 // GET /api/v2/users/:user_id/following_tags
 // document: http://qiita.com/api/v2/docs#get-apiv2usersuser_idfollowing_tags
-func (c *Client) GetUserFollowingTags(ctx context.Context, userID string) ([]*Tag, error) {
-	// TODO: implement
-	return nil, nil
+func (c *Client) GetUserFollowingTags(ctx context.Context, userID string, page, perPage int) (*TagsResponse, error) {
+	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
+		return nil, err
+	}
+
+	query := map[string]string{
+		"page":     strconv.Itoa(page),
+		"per_page": strconv.Itoa(perPage),
+	}
+	req, err := c.newRequest(ctx, "GET", path.Join("users", userID, "following_tags"), query, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var tags []*Tag
+	code, header, err := c.doRequest(req, &tags)
+	if err != nil {
+		return nil, err
+	}
+	if code < 200 || 300 <= code {
+		switch code {
+		case http.StatusNotFound:
+			return nil, fmt.Errorf("user with id '%s' not found (status = %d)", userID, code)
+		default:
+			return nil, fmt.Errorf("unknown error (status = %d)", code)
+		}
+	}
+
+	paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
+	if err != nil {
+		return nil, err
+	}
+
+	return constructTagsResponse(tags, paginationInfo), nil
 }
 
 // IsFollowingUser returns true if the authenticated user is following the user having provided userID.

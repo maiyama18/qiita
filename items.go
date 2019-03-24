@@ -35,7 +35,7 @@ type ItemTag struct {
 	Versions []string `json:"versions"`
 }
 
-// ItemsResponse represents a response from qiita API which returns multiple items.
+// ItemsResponse represents a response from qiita API which includes multiple items.
 type ItemsResponse struct {
 	Items      []*Item
 	PerPage    int

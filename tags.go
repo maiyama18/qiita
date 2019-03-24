@@ -12,6 +12,16 @@ type Tag struct {
 	FollowersCount int    `json:"followers_count"`
 }
 
+// TagsResponse represents a response from qiita API which includes multiple tags.
+type TagsResponse struct {
+	Tags       []*Tag
+	PerPage    int
+	Page       int
+	FirstPage  int
+	LastPage   int
+	TotalCount int
+}
+
 // GetTag fetches the tag having provided tagID.
 //
 // GET /api/v2/tags/:tag_id
@@ -67,4 +77,15 @@ func (c *Client) FollowTag(ctx context.Context, tagID string) error {
 func (c *Client) UnfollowTag(ctx context.Context, tagID string) error {
 	// TODO: implement
 	return nil
+}
+
+func constructTagsResponse(tags []*Tag, info *paginationInfo) *TagsResponse {
+	return &TagsResponse{
+		Tags:       tags,
+		PerPage:    info.PerPage,
+		Page:       info.Page,
+		FirstPage:  info.FirstPage,
+		LastPage:   info.LastPage,
+		TotalCount: info.TotalCount,
+	}
 }
