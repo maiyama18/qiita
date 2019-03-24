@@ -11,10 +11,13 @@ const BaseURL = "https://qiita.com/api/v2"
 
 // Client interacts with qiita API
 type Client struct {
-	URL         *url.URL
-	HTTPClient  *http.Client
+	URL        *url.URL
+	HTTPClient *http.Client
+
 	AccessToken string
-	Logger      *log.Logger
+	UserAgent   string
+
+	Logger *log.Logger
 }
 
 // New returns a Client
@@ -30,9 +33,12 @@ func New(accessToken string, logger *log.Logger) (*Client, error) {
 	}
 
 	return &Client{
-		URL:         baseURL,
-		HTTPClient:  http.DefaultClient,
+		URL:        baseURL,
+		HTTPClient: http.DefaultClient,
+
 		AccessToken: accessToken,
-		Logger:      logger,
+		UserAgent:   "qiita go-client (github.com/muiscript/qiita)",
+
+		Logger: logger,
 	}, nil
 }

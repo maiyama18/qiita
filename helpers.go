@@ -32,7 +32,7 @@ func (c *Client) newRequest(ctx context.Context, method string, relativePath str
 	}
 
 	req = req.WithContext(ctx)
-	req.Header.Set("User-Agent", "qiita go-client (github.com/muiscript/qiita)")
+	req.Header.Set("User-Agent", c.UserAgent)
 	if c.AccessToken != "" {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
 	}
