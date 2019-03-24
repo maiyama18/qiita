@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"path"
+	"strconv"
 	"time"
 )
 
@@ -99,8 +100,32 @@ func (c *Client) GetItem(ctx context.Context, itemID string) (*Item, error) {
 //
 // GET /api/v2/items
 // document: http://qiita.com/api/v2/docs#get-apiv2items
-func (c *Client) GetItems(ctx context.Context) ([]*Item, error) {
-	return nil, nil
+func (c *Client) GetItems(ctx context.Context, page, perPage int) (*ItemsResponse, error) {
+	if err := validatePaginationLimit(page, perPage); err != nil {
+		return nil, err
+	}
+
+	query := map[string]string{
+		"page":     strconv.Itoa(page),
+		"per_page": strconv.Itoa(perPage),
+	}
+	req, err := c.newRequest(ctx, http.MethodGet, "items", query, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var items []*Item
+	code, header, err := c.doRequest(req, &items)
+	if err != nil {
+		return nil, err
+	}
+
+	switch code {
+	case http.StatusOK:
+		return newItemsResponse(items, header, page, perPage)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 // GetItemComments fetches the comments posted on provided itemID.

@@ -120,7 +120,6 @@ func (c *Client) GetUsers(ctx context.Context, page, perPage int) (*UsersRespons
 	default:
 		return nil, fmt.Errorf("unknown error (status = %d)", code)
 	}
-
 }
 
 // GetUserFollowees fetches all the followees of the user having provided userID.
