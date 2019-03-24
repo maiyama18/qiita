@@ -433,9 +433,38 @@ func (c *Client) GetAuthenticatedUser(ctx context.Context) (*User, error) {
 //
 // GET /api/v2/authenticated_user/items
 // document: http://qiita.com/api/v2/docs#get-apiv2authenticated_useritems
-func (c *Client) GetAuthenticatedUserItems(ctx context.Context) ([]*Item, error) {
-	// TODO: implement
-	return nil, nil
+func (c *Client) GetAuthenticatedUserItems(ctx context.Context, page, perPage int) (*ItemsResponse, error) {
+	if err := c.validatePaginationLimit(page, perPage); err != nil {
+		return nil, err
+	}
+
+	query := map[string]string{
+		"page":     strconv.Itoa(page),
+		"per_page": strconv.Itoa(perPage),
+	}
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("authenticated_user", "items"), query, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var items []*Item
+	code, header, err := c.doRequest(req, &items)
+	if err != nil {
+		return nil, err
+	}
+
+	switch code {
+	case http.StatusOK:
+		paginationInfo, err := c.extractPaginationInfo(header, page, perPage)
+		if err != nil {
+			return nil, err
+		}
+		return constructItemsResponse(items, paginationInfo), nil
+	case http.StatusUnauthorized:
+		return nil, fmt.Errorf("unauthorized. you may have provided no/invalid access token (status = %d)", code)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 func constructUsersResponse(users []*User, info *paginationInfo) *UsersResponse {

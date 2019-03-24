@@ -992,3 +992,99 @@ func TestClient_GetAuthenticatedUser(t *testing.T) {
 		})
 	}
 }
+
+func TestClient_GetAuthenticatedUserItems(t *testing.T) {
+	mockFilesBaseDir := path.Join("testdata", "responses", "users", "GetAuthenticatedUserItems")
+
+	tests := []struct {
+		desc         string
+		inputPage    int
+		inputPerPage int
+
+		mockResponseHeaderFile string
+		mockResponseBodyFile   string
+
+		expectedMethod      string
+		expectedRequestPath string
+		expectedRawQuery    string
+		expectedErrString   string
+		expectedPage        int
+		expectedPerPage     int
+		expectedFirstPage   int
+		expectedLastPage    int
+		expectedTotalCount  int
+		expectedItemsLen    int
+	}{
+		{
+			desc:         "success",
+			inputPage:    2,
+			inputPerPage: 2,
+
+			mockResponseHeaderFile: "success-header",
+			mockResponseBodyFile:   "success-body",
+
+			expectedMethod:      http.MethodGet,
+			expectedRequestPath: "/authenticated_user/items",
+			expectedRawQuery:    "page=2&per_page=2",
+			expectedPage:        2,
+			expectedPerPage:     2,
+			expectedFirstPage:   1,
+			expectedLastPage:    8,
+			expectedTotalCount:  16,
+			expectedItemsLen:    2,
+		},
+		{
+			desc:         "failure-page_out_of_range",
+			inputPage:    101,
+			inputPerPage: 2,
+
+			mockResponseHeaderFile: "out_of_range-header",
+			mockResponseBodyFile:   "out_of_range-body",
+
+			expectedMethod:      http.MethodGet,
+			expectedRequestPath: "/authenticated_user/items",
+			expectedRawQuery:    "page=101&per_page=2",
+			expectedErrString:   "page parameter should be",
+		},
+		{
+			desc:         "failure-no_token",
+			inputPage:    2,
+			inputPerPage: 2,
+
+			mockResponseHeaderFile: "no_token-header",
+			mockResponseBodyFile:   "no_token-body",
+
+			expectedMethod:      http.MethodGet,
+			expectedRequestPath: "/authenticated_user/items",
+			expectedRawQuery:    "page=2&per_page=2",
+			expectedErrString:   "unauthorized",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			cli, teardown := setup(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, tt.expectedRawQuery)
+			defer teardown()
+
+			itemsResp, err := cli.GetAuthenticatedUserItems(context.Background(), tt.inputPage, tt.inputPerPage)
+			if tt.expectedErrString == "" {
+				if !assert.Nil(t, err) {
+					t.FailNow()
+				}
+
+				assert.Equal(t, tt.expectedPage, itemsResp.Page)
+				assert.Equal(t, tt.expectedPerPage, itemsResp.PerPage)
+				assert.Equal(t, tt.expectedFirstPage, itemsResp.FirstPage)
+				assert.Equal(t, tt.expectedLastPage, itemsResp.LastPage)
+				assert.Equal(t, tt.expectedTotalCount, itemsResp.TotalCount)
+				assert.Equal(t, tt.expectedItemsLen, len(itemsResp.Items))
+			} else {
+				if !assert.NotNil(t, err) {
+					t.FailNow()
+				}
+
+				assert.True(t, strings.Contains(err.Error(), tt.expectedErrString), fmt.Sprintf("'%s' should contain '%s'", err.Error(), tt.expectedErrString))
+			}
+		})
+	}
+}
