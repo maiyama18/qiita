@@ -81,7 +81,7 @@ func (c *Client) GetUser(ctx context.Context, userID string) (*User, error) {
 // GET /api/v2/users
 // document: https://qiita.com/api/v2/docs#get-apiv2users
 func (c *Client) GetUsers(ctx context.Context, page, perPage int) (*UsersResponse, error) {
-	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
+	if err := c.validatePaginationLimit(page, perPage); err != nil {
 		return nil, err
 	}
 
@@ -120,7 +120,7 @@ func (c *Client) GetUsers(ctx context.Context, page, perPage int) (*UsersRespons
 // GET /api/v2/users/:user_id/followees
 // document: http://qiita.com/api/v2/docs#get-apiv2usersuser_idfollowees
 func (c *Client) GetUserFollowees(ctx context.Context, userID string, page, perPage int) (*UsersResponse, error) {
-	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
+	if err := c.validatePaginationLimit(page, perPage); err != nil {
 		return nil, err
 	}
 
@@ -161,7 +161,7 @@ func (c *Client) GetUserFollowees(ctx context.Context, userID string, page, perP
 // GET /api/v2/users/:user_id/followers
 // document: https://qiita.com/api/v2/docs#get-apiv2usersuser_idfollowers
 func (c *Client) GetUserFollowers(ctx context.Context, userID string, page, perPage int) (*UsersResponse, error) {
-	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
+	if err := c.validatePaginationLimit(page, perPage); err != nil {
 		return nil, err
 	}
 
@@ -201,7 +201,7 @@ func (c *Client) GetUserFollowers(ctx context.Context, userID string, page, perP
 // GET /api/v2/users/:user_id/items
 // document: https://qiita.com/api/v2/docs#get-apiv2usersuser_iditems
 func (c *Client) GetUserItems(ctx context.Context, userID string, page, perPage int) (*ItemsResponse, error) {
-	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
+	if err := c.validatePaginationLimit(page, perPage); err != nil {
 		return nil, err
 	}
 
@@ -241,7 +241,7 @@ func (c *Client) GetUserItems(ctx context.Context, userID string, page, perPage 
 // GET /api/v2/users/:user_id/stocks
 // document: http://qiita.com/api/v2/docs#get-apiv2usersuser_idstocks
 func (c *Client) GetUserStocks(ctx context.Context, userID string, page, perPage int) (*ItemsResponse, error) {
-	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
+	if err := c.validatePaginationLimit(page, perPage); err != nil {
 		return nil, err
 	}
 
@@ -281,7 +281,7 @@ func (c *Client) GetUserStocks(ctx context.Context, userID string, page, perPage
 // GET /api/v2/users/:user_id/following_tags
 // document: http://qiita.com/api/v2/docs#get-apiv2usersuser_idfollowing_tags
 func (c *Client) GetUserFollowingTags(ctx context.Context, userID string, page, perPage int) (*TagsResponse, error) {
-	if err := c.validatePaginationLimit(page, 1, 100, perPage, 1, 100); err != nil {
+	if err := c.validatePaginationLimit(page, perPage); err != nil {
 		return nil, err
 	}
 

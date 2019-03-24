@@ -7,7 +7,13 @@ import (
 	"net/url"
 )
 
-const BaseURL = "https://qiita.com/api/v2"
+const (
+	BaseURL    = "https://qiita.com/api/v2"
+	PageMin    = 1
+	PageMax    = 100
+	PerPageMin = 1
+	PerPageMax = 100
+)
 
 // Client interacts with qiita API
 type Client struct {
