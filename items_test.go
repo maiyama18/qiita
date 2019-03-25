@@ -448,3 +448,89 @@ func TestClient_CreateItem(t *testing.T) {
 		})
 	}
 }
+
+func TestClient_IsStockedItem(t *testing.T) {
+	mockFilesBaseDir := path.Join("testdata", "responses", "items", "IsStockedItem")
+
+	tests := []struct {
+		desc        string
+		inputItemID string
+
+		mockResponseHeaderFile string
+		mockResponseBodyFile   string
+
+		expectedMethod      string
+		expectedRequestPath string
+		expectedRawQuery    string
+		expectedIsStocked   bool
+		expectedErrString   string
+	}{
+		{
+			desc:        "success-stocked",
+			inputItemID: "b0b90e30c7e581aa2b00",
+
+			mockResponseHeaderFile: "stocked-header",
+			mockResponseBodyFile:   "stocked-body",
+
+			expectedMethod:      http.MethodGet,
+			expectedRequestPath: "/items/b0b90e30c7e581aa2b00/stock",
+			expectedIsStocked:   true,
+		},
+		{
+			desc:        "success-not_stocked",
+			inputItemID: "68f6ee99a35a15ed8074",
+
+			mockResponseHeaderFile: "not_stocked-header",
+			mockResponseBodyFile:   "not_stocked-body",
+
+			expectedMethod:      http.MethodGet,
+			expectedRequestPath: "/items/68f6ee99a35a15ed8074/stock",
+			expectedIsStocked:   false,
+		},
+		{
+			desc:        "failure-not_exist",
+			inputItemID: "nonexistent",
+
+			mockResponseHeaderFile: "not_exist-header",
+			mockResponseBodyFile:   "not_exist-body",
+
+			expectedMethod:      http.MethodGet,
+			expectedRequestPath: "/items/nonexistent/stock",
+			expectedIsStocked:   false,
+		},
+		{
+			desc:        "failure-no_token",
+			inputItemID: "b0b90e30c7e581aa2b00",
+
+			mockResponseHeaderFile: "no_token-header",
+			mockResponseBodyFile:   "no_token-body",
+
+			expectedMethod:      http.MethodGet,
+			expectedRequestPath: "/items/b0b90e30c7e581aa2b00/stock",
+			expectedErrString:   "unauthorized",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			cli, teardown := setup(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, tt.expectedRawQuery)
+			defer teardown()
+
+			isFollowing, err := cli.IsStockedItem(context.Background(), tt.inputItemID)
+			if tt.expectedErrString == "" {
+				if !assert.Nil(t, err) {
+					t.FailNow()
+				}
+
+				assert.Equal(t, tt.expectedIsStocked, isFollowing)
+			} else {
+				if !assert.NotNil(t, err) {
+					t.FailNow()
+				}
+
+				assert.True(t, strings.Contains(err.Error(), tt.expectedErrString), fmt.Sprintf("'%s' should contain '%s'", err.Error(), tt.expectedErrString))
+			}
+
+		})
+	}
+}

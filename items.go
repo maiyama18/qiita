@@ -290,8 +290,25 @@ func (c *Client) CreateItemComment(ctx context.Context, itemID string, body stri
 // GET /api/v2/items/:item_id/stock
 // document: http://qiita.com/api/v2/docs#get-apiv2itemsitem_idstock
 func (c *Client) IsStockedItem(ctx context.Context, itemID string) (bool, error) {
-	// TODO: implement
-	return false, nil
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("items", itemID, "stock"), nil, nil)
+	if err != nil {
+		return false, err
+	}
+
+	code, _, err := c.doRequest(req, &struct{}{})
+	if err != nil {
+		return false, err
+	}
+	switch code {
+	case http.StatusNoContent:
+		return true, nil
+	case http.StatusNotFound:
+		return false, nil
+	case http.StatusUnauthorized:
+		return false, fmt.Errorf("unauthorized. you may have provided no/invalid access token (status = %d)", code)
+	default:
+		return false, fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 // StockItem add the item having provided itemID to the authenticated user's stock list.
