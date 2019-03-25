@@ -347,3 +347,104 @@ func TestClient_GetItemComments(t *testing.T) {
 		})
 	}
 }
+
+func TestClient_CreateItem(t *testing.T) {
+	mockFilesBaseDir := path.Join("testdata", "responses", "items", "CreateItem")
+
+	tests := []struct {
+		desc          string
+		inputTitle    string
+		inputBody     string
+		inputItemTags []*ItemTag
+		inputPrivate  bool
+		inputTweet    bool
+
+		mockResponseHeaderFile string
+		mockResponseBodyFile   string
+
+		expectedMethod       string
+		expectedRequestPath  string
+		expectedRawQuery     string
+		expectedErrString    string
+		expectedTitle        string
+		expectedBody         string
+		expectedRenderedBody string
+		expectedItemTagsLen  int
+		expectedPrivate      bool
+	}{
+		{
+			desc:          "success",
+			inputTitle:    "test title",
+			inputBody:     "# test body",
+			inputItemTags: []*ItemTag{{Name: "test_tag", Versions: []string{"0.0.1"}}},
+			inputPrivate:  true,
+			inputTweet:    false,
+
+			mockResponseHeaderFile: "success-header",
+			mockResponseBodyFile:   "success-body",
+
+			expectedMethod:       http.MethodPost,
+			expectedRequestPath:  "/items",
+			expectedTitle:        "test title",
+			expectedBody:         "# test body\n",
+			expectedRenderedBody: "\n<h1>\n<span id=\"test-body\" class=\"fragment\"></span><a href=\"#test-body\"><i class=\"fa fa-link\"></i></a>test body</h1>\n",
+			expectedItemTagsLen:  1,
+			expectedPrivate:      true,
+		},
+		{
+			desc:          "failure-empty_body",
+			inputTitle:    "",
+			inputBody:     "# test body",
+			inputItemTags: []*ItemTag{{Name: "test_tag", Versions: []string{"0.0.1"}}},
+			inputPrivate:  true,
+			inputTweet:    false,
+
+			mockResponseHeaderFile: "empty_field-header",
+			mockResponseBodyFile:   "empty_field-body",
+
+			expectedMethod:      http.MethodPost,
+			expectedRequestPath: "/items",
+			expectedErrString:   "forbidden",
+		},
+		{
+			desc:          "failure-no_token",
+			inputTitle:    "test body",
+			inputBody:     "# test body",
+			inputItemTags: []*ItemTag{{Name: "test_tag", Versions: []string{"0.0.1"}}},
+			inputPrivate:  true,
+			inputTweet:    false,
+
+			mockResponseHeaderFile: "no_token-header",
+			mockResponseBodyFile:   "no_token-body",
+
+			expectedMethod:      http.MethodPost,
+			expectedRequestPath: "/items",
+			expectedErrString:   "unauthorized",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			cli, teardown := setup(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, tt.expectedRawQuery)
+			defer teardown()
+
+			item, err := cli.CreateItem(context.Background(), tt.inputTitle, tt.inputBody, tt.inputItemTags, tt.inputPrivate, tt.inputTweet)
+			if tt.expectedErrString == "" {
+				if !assert.Nil(t, err) {
+					t.FailNow()
+				}
+
+				assert.Equal(t, tt.expectedTitle, item.Title)
+				assert.Equal(t, tt.expectedBody, item.Body)
+				assert.Equal(t, tt.expectedRenderedBody, item.RenderedBody)
+				assert.Equal(t, tt.expectedItemTagsLen, len(item.ItemTags))
+				assert.Equal(t, tt.expectedPrivate, item.Private)
+			} else {
+				if !assert.NotNil(t, err) {
+					t.FailNow()
+				}
+
+				assert.True(t, strings.Contains(err.Error(), tt.expectedErrString), fmt.Sprintf("'%s' should contain '%s'", err.Error(), tt.expectedErrString))
+			}
+		})
+	}
+}

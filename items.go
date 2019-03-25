@@ -209,7 +209,22 @@ func (c *Client) CreateItem(ctx context.Context, title, body string, itemTags []
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	return nil, nil
+	var item Item
+	code, _, err := c.doRequest(req, &item)
+	if err != nil {
+		return nil, err
+	}
+
+	switch code {
+	case http.StatusCreated:
+		return &item, nil
+	case http.StatusUnauthorized:
+		return nil, fmt.Errorf("unauthorized. you may have provided no/invalid access token (status = %d)", code)
+	case http.StatusForbidden:
+		return nil, fmt.Errorf("forbidden. some required field values may be empty or invalid (status = %d)", code)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 // UpdateItem update the item having provided itemID.
