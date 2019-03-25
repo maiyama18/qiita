@@ -232,8 +232,35 @@ func (c *Client) CreateItem(ctx context.Context, title, body string, itemTags []
 //
 // PATCH /api/v2/items/:item_id
 // document: http://qiita.com/api/v2/docs#patch-apiv2itemsitem_id
-func (c *Client) UpdateItem(ctx context.Context, itemID string, title, body string, private, tweet bool) (*Item, error) {
-	// TODO: implement
+func (c *Client) UpdateItem(ctx context.Context, itemID string, title, body string, itemTags []*ItemTag, private, tweet bool) (*Item, error) {
+	//itemDraft := &ItemDraft{Title: title, Body: body, ItemTags: itemTags, Private: private, Tweet: tweet}
+	//bodyBytes, err := json.Marshal(itemDraft)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//req, err := c.newRequest(ctx, http.MethodPatch, path.Join("items", itemID), nil, bytes.NewBuffer(bodyBytes))
+	//if err != nil {
+	//	return nil, err
+	//}
+	//req.Header.Set("Content-Type", "application/json")
+	//
+	//var item Item
+	//code, _, err := c.doRequest(req, &item)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//switch code {
+	//case http.StatusCreated:
+	//	return &item, nil
+	//case http.StatusUnauthorized:
+	//	return nil, fmt.Errorf("unauthorized. you may have provided no/invalid access token (status = %d)", code)
+	//case http.StatusForbidden:
+	//	return nil, fmt.Errorf("forbidden. some required field values may be empty or invalid (status = %d)", code)
+	//default:
+	//	return nil, fmt.Errorf("unknown error (status = %d)", code)
+	//}
 	return nil, nil
 }
 
