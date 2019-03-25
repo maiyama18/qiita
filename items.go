@@ -1,10 +1,13 @@
 package qiita
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"path"
+	"strconv"
 	"time"
 )
 
@@ -25,8 +28,8 @@ type Item struct {
 	LikesCount     int `json:"likes_count"`
 	ReactionsCount int `json:"reactions_count"`
 
-	User *User      `json:"user"`
-	Tags []*ItemTag `json:"tags"`
+	User     *User      `json:"user"`
+	ItemTags []*ItemTag `json:"tags"`
 }
 
 // ItemTag represents a tag for a qiita item.
@@ -63,10 +66,11 @@ func newItemsResponse(items []*Item, header http.Header, page, perPage int) (*It
 
 // ItemDraft represents an item to be posted for qiita.
 type ItemDraft struct {
-	Title   string `json:"title"`
-	Body    string `json:"body"`
-	Private bool   `json:"private"`
-	Tweet   bool   `json:"tweet"`
+	Title    string     `json:"title"`
+	Body     string     `json:"body"`
+	ItemTags []*ItemTag `json:"tags"`
+	Private  bool       `json:"private"`
+	Tweet    bool       `json:"tweet"`
 }
 
 // GetItem fetches the item having provided itemID.
@@ -99,8 +103,32 @@ func (c *Client) GetItem(ctx context.Context, itemID string) (*Item, error) {
 //
 // GET /api/v2/items
 // document: http://qiita.com/api/v2/docs#get-apiv2items
-func (c *Client) GetItems(ctx context.Context) ([]*Item, error) {
-	return nil, nil
+func (c *Client) GetItems(ctx context.Context, page, perPage int) (*ItemsResponse, error) {
+	if err := validatePaginationLimit(page, perPage); err != nil {
+		return nil, err
+	}
+
+	query := map[string]string{
+		"page":     strconv.Itoa(page),
+		"per_page": strconv.Itoa(perPage),
+	}
+	req, err := c.newRequest(ctx, http.MethodGet, "items", query, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var items []*Item
+	code, header, err := c.doRequest(req, &items)
+	if err != nil {
+		return nil, err
+	}
+
+	switch code {
+	case http.StatusOK:
+		return newItemsResponse(items, header, page, perPage)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 // GetItemComments fetches the comments posted on provided itemID.
@@ -108,26 +136,79 @@ func (c *Client) GetItems(ctx context.Context) ([]*Item, error) {
 // GET /api/v2/items/:item_id/comments
 // document: http://qiita.com/api/v2/docs#get-apiv2itemsitem_idcomments
 func (c *Client) GetItemComments(ctx context.Context, itemID string) ([]*Comment, error) {
-	// TODO: implement
-	return nil, nil
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("items", itemID, "comments"), nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var comments []*Comment
+	code, _, err := c.doRequest(req, &comments)
+	if err != nil {
+		return nil, err
+	}
+
+	switch code {
+	case http.StatusOK:
+		return comments, nil
+	case http.StatusNotFound:
+		return nil, fmt.Errorf("item with id '%s' not found (status = %d)", itemID, code)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 // GetItemStockers fetches the users who stocked the item having provided itemID.
 //
 // GET /api/v2/items/:item_id/stockers
 // document: http://qiita.com/api/v2/docs#get-apiv2itemsitem_idstockers
-func (c *Client) GetItemStockers(ctx context.Context, itemID string) ([]*User, error) {
-	// TODO: implement
-	return nil, nil
+func (c *Client) GetItemStockers(ctx context.Context, itemID string, page, perPage int) (*UsersResponse, error) {
+	if err := validatePaginationLimit(page, perPage); err != nil {
+		return nil, err
+	}
+
+	query := map[string]string{
+		"page":     strconv.Itoa(page),
+		"per_page": strconv.Itoa(perPage),
+	}
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("items", itemID, "stockers"), query, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var users []*User
+	code, header, err := c.doRequest(req, &users)
+	if err != nil {
+		return nil, err
+	}
+
+	switch code {
+	case http.StatusOK:
+		return newUsersResponse(users, header, page, perPage)
+	case http.StatusNotFound:
+		return nil, fmt.Errorf("item with id '%s' not found (status = %d)", itemID, code)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
-// CreateItem posts the item.
+// CreateItem publishes the item.
 // This method requires authentication.
 //
 // POST /api/v2/items
 // document: http://qiita.com/api/v2/docs#post-apiv2items
-func (c *Client) CreateItem(ctx context.Context, title, body string, private, tweet bool) (*Item, error) {
-	// TODO: implement
+func (c *Client) CreateItem(ctx context.Context, title, body string, itemTags []*ItemTag, private, tweet bool) (*Item, error) {
+	itemDraft := &ItemDraft{Title: title, Body: body, ItemTags: itemTags, Private: private, Tweet: tweet}
+	bodyBytes, err := json.Marshal(itemDraft)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := c.newRequest(ctx, http.MethodPost, "items", nil, bytes.NewBuffer(bodyBytes))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
 	return nil, nil
 }
 

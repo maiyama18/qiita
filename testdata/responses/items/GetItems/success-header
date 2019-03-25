@@ -1,0 +1,22 @@
+HTTP/2 200 
+date: Sun, 24 Mar 2019 07:32:44 GMT
+content-type: application/json; charset=utf-8
+server: nginx
+x-frame-options: SAMEORIGIN
+x-xss-protection: 1; mode=block
+x-content-type-options: nosniff
+x-download-options: noopen
+x-permitted-cross-domain-policies: none
+referrer-policy: strict-origin-when-cross-origin
+link: <https://qiita.com/api/v2/items?page=1&per_page=2>; rel="first", <https://qiita.com/api/v2/items?page=2&per_page=2>; rel="prev", <https://qiita.com/api/v2/items?page=4&per_page=2>; rel="next", <https://qiita.com/api/v2/items?page=196325&per_page=2>; rel="last"
+total-count: 392649
+etag: W/"eed352601db865dae16cdfc2567b74a5"
+cache-control: max-age=0, private, must-revalidate
+rate-limit: 60
+rate-remaining: 57
+rate-reset: 1553416334
+vary: Origin
+x-runtime: 0.263941
+strict-transport-security: max-age=2592000
+x-request-id: 1d07cdaa-d383-4d7b-983f-d7290f25b651
+

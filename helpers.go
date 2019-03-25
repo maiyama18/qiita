@@ -67,7 +67,7 @@ func (c *Client) doRequest(req *http.Request, body interface{}) (int, http.Heade
 	return resp.StatusCode, resp.Header, nil
 }
 
-func (c *Client) validatePaginationLimit(page, perPage int) error {
+func validatePaginationLimit(page, perPage int) error {
 	if page < PageMin || PageMax < page {
 		return fmt.Errorf("page parameter should be between %d and %d. got %d", PageMin, PageMax, page)
 	}

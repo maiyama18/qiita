@@ -1,9 +1,21 @@
 package qiita
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 // Comment represents a comment on qiita item.
-type Comment struct{}
+type Comment struct {
+	ID           string `json:"id"`
+	Body         string `json:"body"`
+	RenderedBody string `json:"rendered_body"`
+
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+
+	User *User `json:"user"`
+}
 
 // GetComment fetches the comment having provided commentID.
 //
