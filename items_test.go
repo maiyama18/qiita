@@ -583,6 +583,86 @@ func TestClient_UpdateItem(t *testing.T) {
 	}
 }
 
+func TestClient_DeleteItem(t *testing.T) {
+	mockFilesBaseDir := path.Join("testdata", "responses", "items", "DeleteItem")
+
+	tests := []struct {
+		desc        string
+		inputItemID string
+
+		mockResponseHeaderFile string
+		mockResponseBodyFile   string
+
+		expectedMethod      string
+		expectedRequestPath string
+		expectedRawQuery    string
+		expectedErrString   string
+	}{
+		{
+			desc:        "success",
+			inputItemID: "115aecdce865a6d31a6f",
+
+			mockResponseHeaderFile: "success-header",
+			mockResponseBodyFile:   "success-body",
+
+			expectedMethod:      http.MethodDelete,
+			expectedRequestPath: "/items/115aecdce865a6d31a6f",
+		},
+		{
+			desc:        "failure-no_token",
+			inputItemID: "115aecdce865a6d31a6f",
+
+			mockResponseHeaderFile: "no_token-header",
+			mockResponseBodyFile:   "no_token-body",
+
+			expectedMethod:      http.MethodDelete,
+			expectedRequestPath: "/items/115aecdce865a6d31a6f",
+			expectedErrString:   "unauthorized",
+		},
+		{
+			desc:        "failure-not_exist",
+			inputItemID: "nonexistent",
+
+			mockResponseHeaderFile: "not_exist-header",
+			mockResponseBodyFile:   "not_exist-body",
+
+			expectedMethod:      http.MethodDelete,
+			expectedRequestPath: "/items/nonexistent",
+			expectedErrString:   "not found",
+		},
+		{
+			desc:        "failure-no_permission",
+			inputItemID: "68f6ee99a35a15ed8074",
+
+			mockResponseHeaderFile: "no_permission-header",
+			mockResponseBodyFile:   "no_permission-body",
+
+			expectedMethod:      http.MethodDelete,
+			expectedRequestPath: "/items/68f6ee99a35a15ed8074",
+			expectedErrString:   "forbidden",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			cli, teardown := setup(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, tt.expectedRawQuery)
+			defer teardown()
+
+			err := cli.DeleteItem(context.Background(), tt.inputItemID)
+			if tt.expectedErrString == "" {
+				if !assert.Nil(t, err) {
+					t.FailNow()
+				}
+			} else {
+				if !assert.NotNil(t, err) {
+					t.FailNow()
+				}
+
+				assert.True(t, strings.Contains(err.Error(), tt.expectedErrString), fmt.Sprintf("'%s' should contain '%s'", err.Error(), tt.expectedErrString))
+			}
+		})
+	}
+}
+
 func TestClient_IsStockedItem(t *testing.T) {
 	mockFilesBaseDir := path.Join("testdata", "responses", "items", "IsStockedItem")
 

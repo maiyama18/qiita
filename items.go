@@ -271,8 +271,28 @@ func (c *Client) UpdateItem(ctx context.Context, itemID string, title, body stri
 // DELETE /api/v2/items/:item_id
 // document: https://qiita.com/api/v2/docs#delete-apiv2itemsitem_id
 func (c *Client) DeleteItem(ctx context.Context, itemID string) error {
-	// TODO: implement
-	return nil
+	req, err := c.newRequest(ctx, http.MethodDelete, path.Join("items", itemID), nil, nil)
+	if err != nil {
+		return err
+	}
+
+	code, _, err := c.doRequest(req, &struct{}{})
+	if err != nil {
+		return err
+	}
+
+	switch code {
+	case http.StatusNoContent:
+		return nil
+	case http.StatusUnauthorized:
+		return fmt.Errorf("unauthorized. you may have provided no/invalid access token (status = %d)", code)
+	case http.StatusForbidden:
+		return fmt.Errorf("forbidden. some required field values may be empty or invalid (status = %d)", code)
+	case http.StatusNotFound:
+		return fmt.Errorf("item with id '%s' not found (status = %d)", itemID, code)
+	default:
+		return fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 // CreateItemComment post comments on the item having provided itemID.

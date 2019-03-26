@@ -15,6 +15,7 @@ import (
 )
 
 func (c *Client) newRequest(ctx context.Context, method string, relativePath string, query map[string]string, body io.Reader) (*http.Request, error) {
+	// TODO: headerをmapとして引数で渡す
 	reqUrl := *c.URL
 	reqUrl.Path = path.Join(reqUrl.Path, relativePath)
 
