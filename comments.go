@@ -17,6 +17,11 @@ type Comment struct {
 	User *User `json:"user"`
 }
 
+// CommentDraft represents a comment to be posted on qiita item.
+type CommentDraft struct {
+	Body string `json:"body"`
+}
+
 // GetComment fetches the comment having provided commentID.
 //
 // GET /api/v2/comments/:comment_id

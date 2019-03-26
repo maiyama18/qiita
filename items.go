@@ -301,8 +301,34 @@ func (c *Client) DeleteItem(ctx context.Context, itemID string) error {
 // POST /api/v2/items/:item_id/comments
 // document: http://qiita.com/api/v2/docs#post-apiv2itemsitem_idcomments
 func (c *Client) CreateItemComment(ctx context.Context, itemID string, body string) (*Comment, error) {
-	// TODO: implement
-	return nil, nil
+	commentDraft := &CommentDraft{Body: body}
+	bodyBytes, err := json.Marshal(commentDraft)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := c.newRequest(ctx, http.MethodPost, path.Join("items", itemID, "comments"), nil, bytes.NewBuffer(bodyBytes))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	var comment Comment
+	code, _, err := c.doRequest(req, &comment)
+	if err != nil {
+		return nil, err
+	}
+
+	switch code {
+	case http.StatusCreated:
+		return &comment, nil
+	case http.StatusUnauthorized:
+		return nil, fmt.Errorf("unauthorized. you may have provided no/invalid access token (status = %d)", code)
+	case http.StatusForbidden:
+		return nil, fmt.Errorf("forbidden. some required field values may be empty or invalid (status = %d)", code)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 // IsStockedItem returns true if the authenticated user has stocked the item having provided itemID.
