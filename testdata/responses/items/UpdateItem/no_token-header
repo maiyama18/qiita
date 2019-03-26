@@ -1,0 +1,12 @@
+HTTP/2 401 
+date: Tue, 26 Mar 2019 15:35:22 GMT
+content-type: application/json
+server: nginx
+rate-limit: 60
+rate-remaining: 59
+rate-reset: 1553618122
+vary: Origin
+x-runtime: 0.003243
+strict-transport-security: max-age=2592000
+x-request-id: bdcad0ee-8b29-44bf-a2fe-38ee3137c5ee
+
