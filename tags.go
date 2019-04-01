@@ -112,9 +112,34 @@ func (c *Client) GetTags(ctx context.Context, page, perPage int, sort Sort) (*Ta
 //
 // GET /api/v2/tags/:tag_id/items
 // document: http://qiita.com/api/v2/docs#get-apiv2tagstag_iditems
-func (c *Client) GetTagItems(ctx context.Context, tagID string) ([]*Item, error) {
-	// TODO: implement
-	return nil, nil
+func (c *Client) GetTagItems(ctx context.Context, tagID string, page, perPage int) (*ItemsResponse, error) {
+	if err := validatePaginationLimit(page, perPage); err != nil {
+		return nil, err
+	}
+
+	queries := map[string]string{
+		"page":     strconv.Itoa(page),
+		"per_page": strconv.Itoa(perPage),
+	}
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("tags", tagID, "items"), queries, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var items []*Item
+	code, header, err := c.doRequest(req, &items)
+	if err != nil {
+		return nil, err
+	}
+
+	switch code {
+	case http.StatusOK:
+		return newItemsResponse(items, header, page, perPage)
+	case http.StatusNotFound:
+		return nil, fmt.Errorf("tag with id '%s' not found (status = %d)", tagID, code)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 // IsFollowingTag returns true if the authenticated user is following the tag having provided tagID.
