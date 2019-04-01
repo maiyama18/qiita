@@ -745,3 +745,75 @@ func TestClient_StockItem(t *testing.T) {
 		})
 	}
 }
+
+func TestClient_UnstockItem(t *testing.T) {
+	mockFilesBaseDir := path.Join("testdata", "responses", "items", "UnstockItem")
+
+	tests := []struct {
+		desc        string
+		inputItemID string
+
+		mockResponseHeaderFile string
+		mockResponseBodyFile   string
+
+		expectedMethod      string
+		expectedRequestPath string
+		expectedRawQuery    string
+		expectedIsStocked   bool
+		expectedErrString   string
+	}{
+		{
+			desc:        "success",
+			inputItemID: "68f6ee99a35a15ed8074",
+
+			mockResponseHeaderFile: "success-header",
+			mockResponseBodyFile:   "success-body",
+
+			expectedMethod:      http.MethodDelete,
+			expectedRequestPath: "/items/68f6ee99a35a15ed8074/stock",
+		},
+		{
+			desc:        "failure-not_exist",
+			inputItemID: "nonexistent",
+
+			mockResponseHeaderFile: "not_exist-header",
+			mockResponseBodyFile:   "not_exist-body",
+
+			expectedMethod:      http.MethodDelete,
+			expectedRequestPath: "/items/nonexistent/stock",
+			expectedErrString:   "not found",
+		},
+		{
+			desc:        "failure-no_token",
+			inputItemID: "68f6ee99a35a15ed8074",
+
+			mockResponseHeaderFile: "no_token-header",
+			mockResponseBodyFile:   "no_token-body",
+
+			expectedMethod:      http.MethodDelete,
+			expectedRequestPath: "/items/68f6ee99a35a15ed8074/stock",
+			expectedErrString:   "unauthorized",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			cli, teardown := setup(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, tt.expectedRawQuery)
+			defer teardown()
+
+			err := cli.UnstockItem(context.Background(), tt.inputItemID)
+			if tt.expectedErrString == "" {
+				if !assert.Nil(t, err) {
+					t.FailNow()
+				}
+			} else {
+				if !assert.NotNil(t, err) {
+					t.FailNow()
+				}
+
+				assert.True(t, strings.Contains(err.Error(), tt.expectedErrString), fmt.Sprintf("'%s' should contain '%s'", err.Error(), tt.expectedErrString))
+			}
+
+		})
+	}
+}

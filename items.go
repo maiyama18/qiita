@@ -399,6 +399,23 @@ func (c *Client) StockItem(ctx context.Context, itemID string) error {
 // DELETE /api/v2/items/:item_id/stock
 // document: http://qiita.com/api/v2/docs#delete-apiv2itemsitem_idstock
 func (c *Client) UnstockItem(ctx context.Context, itemID string) error {
-	// TODO: implement
-	return nil
+	req, err := c.newRequest(ctx, http.MethodDelete, path.Join("items", itemID, "stock"), nil, nil, nil)
+	if err != nil {
+		return err
+	}
+
+	code, _, err := c.doRequest(req, &struct{}{})
+	if err != nil {
+		return err
+	}
+	switch code {
+	case http.StatusNoContent:
+		return nil
+	case http.StatusNotFound:
+		return fmt.Errorf("item with id '%s' not found (status = %d)", itemID, code)
+	case http.StatusUnauthorized:
+		return fmt.Errorf("unauthorized. you may have provided no/invalid access token (status = %d)", code)
+	default:
+		return fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
