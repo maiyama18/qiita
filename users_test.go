@@ -55,13 +55,7 @@ func TestClient_GetUsers(t *testing.T) {
 			inputPage:    3,
 			inputPerPage: 101,
 
-			mockResponseHeaderFile: "out_of_range-header",
-			mockResponseBodyFile:   "out_of_range-body",
-
-			expectedMethod:      http.MethodGet,
-			expectedRequestPath: "/users",
-			expectedRawQuery:    "page=3&per_page=101",
-			expectedErrString:   "perPage parameter should be",
+			expectedErrString: "perPage parameter should be",
 		},
 	}
 	for _, tt := range tests {
@@ -303,13 +297,7 @@ func TestClient_GetUserFollowees(t *testing.T) {
 			inputPage:    0,
 			inputPerPage: 2,
 
-			mockResponseHeaderFile: "out_of_range-header",
-			mockResponseBodyFile:   "out_of_range-body",
-
-			expectedMethod:      http.MethodGet,
-			expectedRequestPath: "/users/muiscript/followees",
-			expectedRawQuery:    "page=0&per_page=2",
-			expectedErrString:   "page parameter should be",
+			expectedErrString: "page parameter should be",
 		},
 		{
 			desc:         "failure-not_exist",
@@ -403,13 +391,7 @@ func TestClient_GetUserFollowers(t *testing.T) {
 			inputPage:    0,
 			inputPerPage: 2,
 
-			mockResponseHeaderFile: "out_of_range-header",
-			mockResponseBodyFile:   "out_of_range-body",
-
-			expectedMethod:      http.MethodGet,
-			expectedRequestPath: "/users/muiscript/followers",
-			expectedRawQuery:    "page=0&per_page=2",
-			expectedErrString:   "page parameter should be",
+			expectedErrString: "page parameter should be",
 		},
 		{
 			desc:         "failure-not_exist",
@@ -503,13 +485,7 @@ func TestClient_GetUserItems(t *testing.T) {
 			inputPage:    101,
 			inputPerPage: 2,
 
-			mockResponseHeaderFile: "out_of_range-header",
-			mockResponseBodyFile:   "out_of_range-body",
-
-			expectedMethod:      http.MethodGet,
-			expectedRequestPath: "/users/muiscript/items",
-			expectedRawQuery:    "page=101&per_page=2",
-			expectedErrString:   "page parameter should be",
+			expectedErrString: "page parameter should be",
 		},
 		{
 			desc:         "failure-not_exist",
@@ -603,13 +579,7 @@ func TestClient_GetUserStocks(t *testing.T) {
 			inputPage:    101,
 			inputPerPage: 2,
 
-			mockResponseHeaderFile: "out_of_range-header",
-			mockResponseBodyFile:   "out_of_range-body",
-
-			expectedMethod:      http.MethodGet,
-			expectedRequestPath: "/users/muiscript/stocks",
-			expectedRawQuery:    "page=101&per_page=2",
-			expectedErrString:   "page parameter should be",
+			expectedErrString: "page parameter should be",
 		},
 		{
 			desc:         "failure-not_exist",
@@ -703,13 +673,7 @@ func TestClient_GetUserFollowingTags(t *testing.T) {
 			inputPage:    101,
 			inputPerPage: 2,
 
-			mockResponseHeaderFile: "out_of_range-header",
-			mockResponseBodyFile:   "out_of_range-body",
-
-			expectedMethod:      http.MethodGet,
-			expectedRequestPath: "/users/muiscript/following_tags",
-			expectedRawQuery:    "page=101&per_page=2",
-			expectedErrString:   "page parameter should be",
+			expectedErrString: "page parameter should be",
 		},
 		{
 			desc:         "failure-not_exist",
@@ -1038,13 +1002,7 @@ func TestClient_GetAuthenticatedUserItems(t *testing.T) {
 			inputPage:    101,
 			inputPerPage: 2,
 
-			mockResponseHeaderFile: "out_of_range-header",
-			mockResponseBodyFile:   "out_of_range-body",
-
-			expectedMethod:      http.MethodGet,
-			expectedRequestPath: "/authenticated_user/items",
-			expectedRawQuery:    "page=101&per_page=2",
-			expectedErrString:   "page parameter should be",
+			expectedErrString: "page parameter should be",
 		},
 		{
 			desc:         "failure-no_token",

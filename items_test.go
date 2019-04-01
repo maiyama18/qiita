@@ -56,13 +56,7 @@ func TestClient_GetItems(t *testing.T) {
 			inputPage:    101,
 			inputPerPage: 2,
 
-			mockResponseHeaderFile: "out_of_range-header",
-			mockResponseBodyFile:   "out_of_range-body",
-
-			expectedMethod:      http.MethodGet,
-			expectedRequestPath: "/items",
-			expectedRawQuery:    "page=101&per_page=2",
-			expectedErrString:   "page parameter should be",
+			expectedErrString: "page parameter should be",
 		},
 	}
 	for _, tt := range tests {
@@ -235,13 +229,7 @@ func TestClient_GetItemStockers(t *testing.T) {
 			inputPage:    101,
 			inputPerPage: 2,
 
-			mockResponseHeaderFile: "out_of_range-header",
-			mockResponseBodyFile:   "out_of_range-body",
-
-			expectedMethod:      http.MethodGet,
-			expectedRequestPath: "/items/b4ca1773580317e7112e/stockers",
-			expectedRawQuery:    "page=101&per_page=2",
-			expectedErrString:   "page parameter should be",
+			expectedErrString: "page parameter should be",
 		},
 		{
 			desc:         "failure-not_found",

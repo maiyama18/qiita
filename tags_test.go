@@ -131,13 +131,7 @@ func TestClient_GetTags(t *testing.T) {
 			inputPerPage: 2,
 			inputSort:    Count,
 
-			mockResponseHeaderFile: "out_of_range-header",
-			mockResponseBodyFile:   "out_of_range-body",
-
-			expectedMethod:      http.MethodGet,
-			expectedRequestPath: "/tags",
-			expectedRawQuery:    "page=101&per_page=2&sort=count",
-			expectedErrString:   "page parameter should be",
+			expectedErrString: "page parameter should be",
 		},
 	}
 	for _, tt := range tests {
