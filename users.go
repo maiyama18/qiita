@@ -68,7 +68,7 @@ type paginationInfo struct {
 // GET /api/v2/users/:user_id
 // document: https://qiita.com/api/v2/docs#get-apiv2usersuser_id
 func (c *Client) GetUser(ctx context.Context, userID string) (*User, error) {
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID), nil, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID), nil, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func (c *Client) GetUsers(ctx context.Context, page, perPage int) (*UsersRespons
 		"page":     strconv.Itoa(page),
 		"per_page": strconv.Itoa(perPage),
 	}
-	req, err := c.newRequest(ctx, http.MethodGet, "users", query, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, "users", query, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func (c *Client) GetUserFollowees(ctx context.Context, userID string, page, perP
 		"page":     strconv.Itoa(page),
 		"per_page": strconv.Itoa(perPage),
 	}
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "followees"), query, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "followees"), query, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -171,7 +171,7 @@ func (c *Client) GetUserFollowers(ctx context.Context, userID string, page, perP
 		"page":     strconv.Itoa(page),
 		"per_page": strconv.Itoa(perPage),
 	}
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "followers"), query, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "followers"), query, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func (c *Client) GetUserItems(ctx context.Context, userID string, page, perPage 
 		"page":     strconv.Itoa(page),
 		"per_page": strconv.Itoa(perPage),
 	}
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "items"), query, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "items"), query, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +239,7 @@ func (c *Client) GetUserStocks(ctx context.Context, userID string, page, perPage
 		"page":     strconv.Itoa(page),
 		"per_page": strconv.Itoa(perPage),
 	}
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "stocks"), query, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "stocks"), query, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -273,7 +273,7 @@ func (c *Client) GetUserFollowingTags(ctx context.Context, userID string, page, 
 		"page":     strconv.Itoa(page),
 		"per_page": strconv.Itoa(perPage),
 	}
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "following_tags"), query, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "following_tags"), query, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -300,7 +300,7 @@ func (c *Client) GetUserFollowingTags(ctx context.Context, userID string, page, 
 // GET /api/v2/users/:user_id/following
 // document: https://qiita.com/api/v2/docs#get-apiv2usersuser_idfollowing
 func (c *Client) IsFollowingUser(ctx context.Context, userID string) (bool, error) {
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "following"), nil, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "following"), nil, nil, nil)
 	if err != nil {
 		return false, err
 	}
@@ -327,7 +327,7 @@ func (c *Client) IsFollowingUser(ctx context.Context, userID string) (bool, erro
 // PUT /api/v2/users/:user_id/following
 // document: http://qiita.com/api/v2/docs#put-apiv2usersuser_idfollowing
 func (c *Client) FollowUser(ctx context.Context, userID string) error {
-	req, err := c.newRequest(ctx, http.MethodPut, path.Join("users", userID, "following"), nil, nil)
+	req, err := c.newRequest(ctx, http.MethodPut, path.Join("users", userID, "following"), nil, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -356,7 +356,7 @@ func (c *Client) FollowUser(ctx context.Context, userID string) error {
 // DELETE /api/v2/users/:user_id/following
 // document: http://qiita.com/api/v2/docs#delete-apiv2usersuser_idfollowing
 func (c *Client) UnfollowUser(ctx context.Context, userID string) error {
-	req, err := c.newRequest(ctx, http.MethodDelete, path.Join("users", userID, "following"), nil, nil)
+	req, err := c.newRequest(ctx, http.MethodDelete, path.Join("users", userID, "following"), nil, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -385,7 +385,7 @@ func (c *Client) UnfollowUser(ctx context.Context, userID string) error {
 // GET /api/v2/authenticated_user
 // document: http://qiita.com/api/v2/docs#get-apiv2authenticated_user
 func (c *Client) GetAuthenticatedUser(ctx context.Context) (*User, error) {
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("authenticated_user"), nil, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("authenticated_user"), nil, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -420,7 +420,7 @@ func (c *Client) GetAuthenticatedUserItems(ctx context.Context, page, perPage in
 		"page":     strconv.Itoa(page),
 		"per_page": strconv.Itoa(perPage),
 	}
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("authenticated_user", "items"), query, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("authenticated_user", "items"), query, nil, nil)
 	if err != nil {
 		return nil, err
 	}

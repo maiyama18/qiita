@@ -78,7 +78,7 @@ type ItemDraft struct {
 // GET /api/v2/items/:item_id
 // document: https://qiita.com/api/v2/docs#get-apiv2itemsitem_id
 func (c *Client) GetItem(ctx context.Context, itemID string) (*Item, error) {
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("items", itemID), nil, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("items", itemID), nil, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ func (c *Client) GetItems(ctx context.Context, page, perPage int) (*ItemsRespons
 		"page":     strconv.Itoa(page),
 		"per_page": strconv.Itoa(perPage),
 	}
-	req, err := c.newRequest(ctx, http.MethodGet, "items", query, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, "items", query, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func (c *Client) GetItems(ctx context.Context, page, perPage int) (*ItemsRespons
 // GET /api/v2/items/:item_id/comments
 // document: http://qiita.com/api/v2/docs#get-apiv2itemsitem_idcomments
 func (c *Client) GetItemComments(ctx context.Context, itemID string) ([]*Comment, error) {
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("items", itemID, "comments"), nil, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("items", itemID, "comments"), nil, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -170,7 +170,7 @@ func (c *Client) GetItemStockers(ctx context.Context, itemID string, page, perPa
 		"page":     strconv.Itoa(page),
 		"per_page": strconv.Itoa(perPage),
 	}
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("items", itemID, "stockers"), query, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("items", itemID, "stockers"), query, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -203,11 +203,13 @@ func (c *Client) CreateItem(ctx context.Context, title, body string, itemTags []
 		return nil, err
 	}
 
-	req, err := c.newRequest(ctx, http.MethodPost, "items", nil, bytes.NewBuffer(bodyBytes))
+	headers := map[string]string{
+		"Content-Type": "application/json",
+	}
+	req, err := c.newRequest(ctx, http.MethodPost, "items", nil, headers, bytes.NewBuffer(bodyBytes))
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", "application/json")
 
 	var item Item
 	code, _, err := c.doRequest(req, &item)
@@ -239,11 +241,13 @@ func (c *Client) UpdateItem(ctx context.Context, itemID string, title, body stri
 		return nil, err
 	}
 
-	req, err := c.newRequest(ctx, http.MethodPatch, path.Join("items", itemID), nil, bytes.NewBuffer(bodyBytes))
+	headers := map[string]string{
+		"Content-Type": "application/json",
+	}
+	req, err := c.newRequest(ctx, http.MethodPatch, path.Join("items", itemID), nil, headers, bytes.NewBuffer(bodyBytes))
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", "application/json")
 
 	var item Item
 	code, _, err := c.doRequest(req, &item)
@@ -271,7 +275,7 @@ func (c *Client) UpdateItem(ctx context.Context, itemID string, title, body stri
 // DELETE /api/v2/items/:item_id
 // document: https://qiita.com/api/v2/docs#delete-apiv2itemsitem_id
 func (c *Client) DeleteItem(ctx context.Context, itemID string) error {
-	req, err := c.newRequest(ctx, http.MethodDelete, path.Join("items", itemID), nil, nil)
+	req, err := c.newRequest(ctx, http.MethodDelete, path.Join("items", itemID), nil, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -307,11 +311,13 @@ func (c *Client) CreateItemComment(ctx context.Context, itemID string, body stri
 		return nil, err
 	}
 
-	req, err := c.newRequest(ctx, http.MethodPost, path.Join("items", itemID, "comments"), nil, bytes.NewBuffer(bodyBytes))
+	headers := map[string]string{
+		"Content-Type": "application/json",
+	}
+	req, err := c.newRequest(ctx, http.MethodPost, path.Join("items", itemID, "comments"), nil, headers, bytes.NewBuffer(bodyBytes))
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", "application/json")
 
 	var comment Comment
 	code, _, err := c.doRequest(req, &comment)
@@ -337,7 +343,7 @@ func (c *Client) CreateItemComment(ctx context.Context, itemID string, body stri
 // GET /api/v2/items/:item_id/stock
 // document: http://qiita.com/api/v2/docs#get-apiv2itemsitem_idstock
 func (c *Client) IsStockedItem(ctx context.Context, itemID string) (bool, error) {
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("items", itemID, "stock"), nil, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("items", itemID, "stock"), nil, nil, nil)
 	if err != nil {
 		return false, err
 	}
