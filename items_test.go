@@ -663,8 +663,8 @@ func TestClient_DeleteItem(t *testing.T) {
 	}
 }
 
-func TestClient_IsStockedItem(t *testing.T) {
-	mockFilesBaseDir := path.Join("testdata", "responses", "items", "IsStockedItem")
+func TestClient_StockItem(t *testing.T) {
+	mockFilesBaseDir := path.Join("testdata", "responses", "items", "StockItem")
 
 	tests := []struct {
 		desc        string
@@ -680,26 +680,25 @@ func TestClient_IsStockedItem(t *testing.T) {
 		expectedErrString   string
 	}{
 		{
-			desc:        "success-stocked",
-			inputItemID: "b0b90e30c7e581aa2b00",
-
-			mockResponseHeaderFile: "stocked-header",
-			mockResponseBodyFile:   "stocked-body",
-
-			expectedMethod:      http.MethodGet,
-			expectedRequestPath: "/items/b0b90e30c7e581aa2b00/stock",
-			expectedIsStocked:   true,
-		},
-		{
-			desc:        "success-not_stocked",
+			desc:        "success",
 			inputItemID: "68f6ee99a35a15ed8074",
 
-			mockResponseHeaderFile: "not_stocked-header",
-			mockResponseBodyFile:   "not_stocked-body",
+			mockResponseHeaderFile: "success-header",
+			mockResponseBodyFile:   "success-body",
 
-			expectedMethod:      http.MethodGet,
+			expectedMethod:      http.MethodPut,
 			expectedRequestPath: "/items/68f6ee99a35a15ed8074/stock",
-			expectedIsStocked:   false,
+		},
+		{
+			desc:        "failure-already_stocked",
+			inputItemID: "68f6ee99a35a15ed8074",
+
+			mockResponseHeaderFile: "already_stocked-header",
+			mockResponseBodyFile:   "already_stocked-body",
+
+			expectedMethod:      http.MethodPut,
+			expectedRequestPath: "/items/68f6ee99a35a15ed8074/stock",
+			expectedErrString:   "forbidden",
 		},
 		{
 			desc:        "failure-not_exist",
@@ -708,19 +707,19 @@ func TestClient_IsStockedItem(t *testing.T) {
 			mockResponseHeaderFile: "not_exist-header",
 			mockResponseBodyFile:   "not_exist-body",
 
-			expectedMethod:      http.MethodGet,
+			expectedMethod:      http.MethodPut,
 			expectedRequestPath: "/items/nonexistent/stock",
-			expectedIsStocked:   false,
+			expectedErrString:   "not found",
 		},
 		{
 			desc:        "failure-no_token",
-			inputItemID: "b0b90e30c7e581aa2b00",
+			inputItemID: "68f6ee99a35a15ed8074",
 
 			mockResponseHeaderFile: "no_token-header",
 			mockResponseBodyFile:   "no_token-body",
 
-			expectedMethod:      http.MethodGet,
-			expectedRequestPath: "/items/b0b90e30c7e581aa2b00/stock",
+			expectedMethod:      http.MethodPut,
+			expectedRequestPath: "/items/68f6ee99a35a15ed8074/stock",
 			expectedErrString:   "unauthorized",
 		},
 	}
@@ -730,13 +729,11 @@ func TestClient_IsStockedItem(t *testing.T) {
 			cli, teardown := setup(t, mockFilesBaseDir, tt.mockResponseHeaderFile, tt.mockResponseBodyFile, tt.expectedMethod, tt.expectedRequestPath, tt.expectedRawQuery)
 			defer teardown()
 
-			isFollowing, err := cli.IsStockedItem(context.Background(), tt.inputItemID)
+			err := cli.StockItem(context.Background(), tt.inputItemID)
 			if tt.expectedErrString == "" {
 				if !assert.Nil(t, err) {
 					t.FailNow()
 				}
-
-				assert.Equal(t, tt.expectedIsStocked, isFollowing)
 			} else {
 				if !assert.NotNil(t, err) {
 					t.FailNow()

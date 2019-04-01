@@ -370,8 +370,27 @@ func (c *Client) IsStockedItem(ctx context.Context, itemID string) (bool, error)
 // PUT /api/v2/items/:item_id/stock
 // document: http://qiita.com/api/v2/docs#put-apiv2itemsitem_idstock
 func (c *Client) StockItem(ctx context.Context, itemID string) error {
-	// TODO: implement
-	return nil
+	req, err := c.newRequest(ctx, http.MethodPut, path.Join("items", itemID, "stock"), nil, nil, nil)
+	if err != nil {
+		return err
+	}
+
+	code, _, err := c.doRequest(req, &struct{}{})
+	if err != nil {
+		return err
+	}
+	switch code {
+	case http.StatusNoContent:
+		return nil
+	case http.StatusForbidden:
+		return fmt.Errorf("forbidden. you may already have stocked item with id '%s' (status = %d)", itemID, code)
+	case http.StatusNotFound:
+		return fmt.Errorf("item with id '%s' not found (status = %d)", itemID, code)
+	case http.StatusUnauthorized:
+		return fmt.Errorf("unauthorized. you may have provided no/invalid access token (status = %d)", code)
+	default:
+		return fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 // UnstockItem remove the item having provided itemID from the authenticated user's stock list.
