@@ -99,11 +99,11 @@ func (c *Client) GetUsers(ctx context.Context, page, perPage int) (*UsersRespons
 		return nil, err
 	}
 
-	query := map[string]string{
+	queries := map[string]string{
 		"page":     strconv.Itoa(page),
 		"per_page": strconv.Itoa(perPage),
 	}
-	req, err := c.newRequest(ctx, http.MethodGet, "users", query, nil, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, "users", queries, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -132,11 +132,11 @@ func (c *Client) GetUserFollowees(ctx context.Context, userID string, page, perP
 		return nil, err
 	}
 
-	query := map[string]string{
+	queries := map[string]string{
 		"page":     strconv.Itoa(page),
 		"per_page": strconv.Itoa(perPage),
 	}
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "followees"), query, nil, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "followees"), queries, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -167,11 +167,11 @@ func (c *Client) GetUserFollowers(ctx context.Context, userID string, page, perP
 		return nil, err
 	}
 
-	query := map[string]string{
+	queries := map[string]string{
 		"page":     strconv.Itoa(page),
 		"per_page": strconv.Itoa(perPage),
 	}
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "followers"), query, nil, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "followers"), queries, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -201,11 +201,11 @@ func (c *Client) GetUserItems(ctx context.Context, userID string, page, perPage 
 		return nil, err
 	}
 
-	query := map[string]string{
+	queries := map[string]string{
 		"page":     strconv.Itoa(page),
 		"per_page": strconv.Itoa(perPage),
 	}
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "items"), query, nil, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "items"), queries, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -235,11 +235,11 @@ func (c *Client) GetUserStocks(ctx context.Context, userID string, page, perPage
 		return nil, err
 	}
 
-	query := map[string]string{
+	queries := map[string]string{
 		"page":     strconv.Itoa(page),
 		"per_page": strconv.Itoa(perPage),
 	}
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "stocks"), query, nil, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "stocks"), queries, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -269,11 +269,11 @@ func (c *Client) GetUserFollowingTags(ctx context.Context, userID string, page, 
 		return nil, err
 	}
 
-	query := map[string]string{
+	queries := map[string]string{
 		"page":     strconv.Itoa(page),
 		"per_page": strconv.Itoa(perPage),
 	}
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "following_tags"), query, nil, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("users", userID, "following_tags"), queries, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -416,11 +416,11 @@ func (c *Client) GetAuthenticatedUserItems(ctx context.Context, page, perPage in
 		return nil, err
 	}
 
-	query := map[string]string{
+	queries := map[string]string{
 		"page":     strconv.Itoa(page),
 		"per_page": strconv.Itoa(perPage),
 	}
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("authenticated_user", "items"), query, nil, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("authenticated_user", "items"), queries, nil, nil)
 	if err != nil {
 		return nil, err
 	}

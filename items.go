@@ -108,11 +108,11 @@ func (c *Client) GetItems(ctx context.Context, page, perPage int) (*ItemsRespons
 		return nil, err
 	}
 
-	query := map[string]string{
+	queries := map[string]string{
 		"page":     strconv.Itoa(page),
 		"per_page": strconv.Itoa(perPage),
 	}
-	req, err := c.newRequest(ctx, http.MethodGet, "items", query, nil, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, "items", queries, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -166,11 +166,11 @@ func (c *Client) GetItemStockers(ctx context.Context, itemID string, page, perPa
 		return nil, err
 	}
 
-	query := map[string]string{
+	queries := map[string]string{
 		"page":     strconv.Itoa(page),
 		"per_page": strconv.Itoa(perPage),
 	}
-	req, err := c.newRequest(ctx, http.MethodGet, path.Join("items", itemID, "stockers"), query, nil, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("items", itemID, "stockers"), queries, nil, nil)
 	if err != nil {
 		return nil, err
 	}
