@@ -5,6 +5,14 @@ import (
 	"fmt"
 	"net/http"
 	"path"
+	"strconv"
+)
+
+type Sort string
+
+const (
+	Count Sort = "count"
+	Name  Sort = "name"
 )
 
 // Tag represents tag which can be attached to a qiita item.
@@ -71,9 +79,33 @@ func (c *Client) GetTag(ctx context.Context, tagID string) (*Tag, error) {
 //
 // GET /api/v2/tags
 // document: http://qiita.com/api/v2/docs#get-apiv2tags
-func (c *Client) GetTags(ctx context.Context) ([]*Tag, error) {
-	// TODO: implement
-	return nil, nil
+func (c *Client) GetTags(ctx context.Context, page, perPage int, sort Sort) (*TagsResponse, error) {
+	if err := validatePaginationLimit(page, perPage); err != nil {
+		return nil, err
+	}
+
+	queries := map[string]string{
+		"page":     strconv.Itoa(page),
+		"per_page": strconv.Itoa(perPage),
+		"sort":     string(sort),
+	}
+	req, err := c.newRequest(ctx, http.MethodGet, "tags", queries, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var tags []*Tag
+	code, header, err := c.doRequest(req, &tags)
+	if err != nil {
+		return nil, err
+	}
+
+	switch code {
+	case http.StatusOK:
+		return newTagsResponse(tags, header, page, perPage)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 // GetTagItems fetches the items which the tag having provided tagID is attached.
