@@ -2,7 +2,9 @@ package qiita
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"path"
 )
 
 // Tag represents tag which can be attached to a qiita item.
@@ -44,8 +46,25 @@ func newTagsResponse(tags []*Tag, header http.Header, page, perPage int) (*TagsR
 // GET /api/v2/tags/:tag_id
 // document: http://qiita.com/api/v2/docs#get-apiv2tagstag_id
 func (c *Client) GetTag(ctx context.Context, tagID string) (*Tag, error) {
-	// TODO: implement
-	return nil, nil
+	req, err := c.newRequest(ctx, http.MethodGet, path.Join("tags", tagID), nil, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var tag Tag
+	code, _, err := c.doRequest(req, &tag)
+	if err != nil {
+		return nil, err
+	}
+
+	switch code {
+	case http.StatusOK:
+		return &tag, nil
+	case http.StatusNotFound:
+		return nil, fmt.Errorf("tag with id '%s' not found (status = %d)", tagID, code)
+	default:
+		return nil, fmt.Errorf("unknown error (status = %d)", code)
+	}
 }
 
 // GetTags fetches all the tags.

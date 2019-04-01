@@ -14,13 +14,13 @@ import (
 	"strings"
 )
 
-func (c *Client) newRequest(ctx context.Context, method string, relativePath string, query map[string]string, body io.Reader) (*http.Request, error) {
+func (c *Client) newRequest(ctx context.Context, method string, relativePath string, queries map[string]string, headers map[string]string, body io.Reader) (*http.Request, error) {
 	reqUrl := *c.URL
 	reqUrl.Path = path.Join(reqUrl.Path, relativePath)
 
-	if query != nil {
+	if queries != nil {
 		q := reqUrl.Query()
-		for k, v := range query {
+		for k, v := range queries {
 			q.Add(k, v)
 		}
 		reqUrl.RawQuery = q.Encode()
@@ -32,9 +32,16 @@ func (c *Client) newRequest(ctx context.Context, method string, relativePath str
 	}
 
 	req = req.WithContext(ctx)
-	req.Header.Set("User-Agent", c.UserAgent)
+
+	if headers == nil {
+		headers = make(map[string]string)
+	}
+	headers["User-Agent"] = c.UserAgent
 	if c.AccessToken != "" {
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+		headers["Authorization"] = fmt.Sprintf("Bearer %s", c.AccessToken)
+	}
+	for k, v := range headers {
+		req.Header.Set(k, v)
 	}
 
 	return req, nil
